@@ -204,6 +204,19 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               )}
             </div>
 
+            {/* Civic Karma Coins Badge for Citizens */}
+            {role === 'CITIZEN' && user && (
+              <button
+                onClick={() => setCurrentTab('citizen_dashboard')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-extrabold text-xs shadow-xs transition-all hover:scale-105"
+                title="Your Civic Karma Coins. Earn coins by reporting and verifying civic hazards!"
+              >
+                <span className="text-sm select-none">🪙</span>
+                <span>{user.coins || 0}</span>
+                <span className="text-[10px] text-amber-700 uppercase font-black tracking-wider">Coins</span>
+              </button>
+            )}
+
             {/* Profile info */}
             {user ? (
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">

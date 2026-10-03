@@ -157,6 +157,7 @@ class Database {
         address: 'Flat 402, Green Avenue, FC Road',
         city: 'Pune',
         wardId: 'ward_12',
+        coins: 250,
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-09-15T09:00:00.000Z'
       },
@@ -170,6 +171,7 @@ class Database {
         address: 'B-12 Shanti Heights, Ward 12 Main Road',
         city: 'Pune',
         wardId: 'ward_12',
+        coins: 180,
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-09-18T10:30:00.000Z'
       },
@@ -183,6 +185,7 @@ class Database {
         address: '74 Market Yard, Laxmi Road',
         city: 'Pune',
         wardId: 'ward_8',
+        coins: 120,
         avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-09-20T14:15:00.000Z'
       },
@@ -1079,10 +1082,35 @@ class Database {
   }
 
   addUser(user) {
-    const newUser = { id: user.id || `usr_${uuidv4()}`, createdAt: new Date().toISOString(), ...user };
+    const newUser = {
+      id: user.id || `usr_${uuidv4()}`,
+      coins: user.coins !== undefined ? user.coins : 50,
+      createdAt: new Date().toISOString(),
+      ...user
+    };
     this.users.push(newUser);
     saveUserToSupabase(newUser).catch(err => console.warn('Supabase save user notice:', err.message));
     return newUser;
+  }
+
+  awardCoins(userId, amount, reason = 'Civic Contribution') {
+    const user = this.findUserById(userId);
+    if (!user) return null;
+    user.coins = (user.coins || 0) + amount;
+    this.addAuditLog({
+      userId: user.id,
+      userName: user.name,
+      userRole: user.role,
+      action: 'COINS_AWARDED',
+      targetType: 'USER',
+      targetId: user.id,
+      details: `Awarded +${amount} Civic Coins to ${user.name}. Reason: ${reason}. Total Coins: ${user.coins}.`
+    });
+    return {
+      coinsEarned: amount,
+      totalCoins: user.coins,
+      reason
+    };
   }
 
   getComplaints(filter = {}) {

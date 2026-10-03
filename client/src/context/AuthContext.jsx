@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
           phone: '+91 98765 43210',
           wardId: 'ward_12',
           city: 'Pune',
+          coins: 250,
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
         });
         setLoading(false);
@@ -126,10 +127,15 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateCoins = (newCoinCount) => {
+    setUser(prev => prev ? { ...prev, coins: newCoinCount } : prev);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        coins: user?.coins || 0,
         token,
         role: user?.role || 'GUEST',
         isAuthenticated: Boolean(user),
@@ -138,6 +144,7 @@ export function AuthProvider({ children }) {
         register,
         logout,
         switchRole,
+        updateCoins,
         showToast,
         toast
       }}

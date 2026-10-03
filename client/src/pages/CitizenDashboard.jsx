@@ -17,10 +17,11 @@ import { useAuth } from '../context/AuthContext';
 import { BeforeAfterSlider } from '../components/BeforeAfterSlider';
 
 export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
-  const { user, showToast } = useAuth();
+  const { user, showToast, updateCoins } = useAuth();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pendingVerificationComplaint, setPendingVerificationComplaint] = useState(null);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
 
   const fetchMyComplaints = async () => {
     try {
@@ -63,7 +64,12 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Resolution confirmed! Complaint closed.', 'success');
+        if (data.reward) {
+          updateCoins(data.reward.totalCoins);
+          showToast(`✅ Resolution verified! 🪙 +${data.reward.coinsEarned} Civic Coins credited!`, 'success');
+        } else {
+          showToast('Resolution confirmed! Complaint closed.', 'success');
+        }
         fetchMyComplaints();
       }
     } catch (err) {
@@ -93,29 +99,66 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Top Banner with Quick Report CTA */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">
-              Citizen Portal • {user?.wardId ? `Ward ${user.wardId.replace('ward_', '')}` : 'Ward 12'}
-            </span>
+      {/* Top Banner with Quick Report CTA & Civic Coins Wallet */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 flex flex-col justify-between p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-blue-600 font-bold uppercase tracking-wider">
+                Citizen Portal • {user?.wardId ? `Ward ${user.wardId.replace('ward_', '')}` : 'Ward 12'}
+              </span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+              Welcome, {user?.name || 'Citizen'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Track your civic submissions, live field repairs, and verify completed works.
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            Welcome, {user?.name || 'Citizen'}
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Track your civic submissions, live field repairs, and verify completed works.
-          </p>
+
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              onClick={() => setCurrentTab('report_issue')}
+              className="px-6 py-3.5 rounded-2xl font-extrabold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <FilePlus className="w-4 h-4" />
+              <span>Report New Problem (+50–100 Coins)</span>
+            </button>
+          </div>
         </div>
 
-        <button
-          onClick={() => setCurrentTab('report_issue')}
-          className="px-6 py-3.5 rounded-2xl font-extrabold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 self-start sm:self-auto"
-        >
-          <FilePlus className="w-4 h-4" />
-          <span>Report New Problem</span>
-        </button>
+        {/* 🪙 Civic Karma Rewards Wallet Tile */}
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50 via-white to-yellow-50 border border-amber-200 shadow-sm flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider border border-amber-300">
+              Civic Karma Wallet
+            </span>
+            <span className="text-xs font-bold text-amber-800">
+              {user?.coins >= 200 ? '🥇 Gold Guardian' : user?.coins >= 100 ? '🥈 Silver Inspector' : '🥉 Bronze Reporter'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-300 flex items-center justify-center text-3xl shadow-inner">
+              🪙
+            </div>
+            <div>
+              <div className="text-3xl font-black text-slate-900 leading-none">
+                {user?.coins || 0}
+              </div>
+              <div className="text-[11px] font-bold text-amber-800 mt-1">
+                Available Civic Credit Coins
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowRedeemModal(true)}
+            className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
+          >
+            <span>🎁 Redeem City Perks & Vouchers</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards Row */}
@@ -290,6 +333,98 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
           </div>
         )}
       </div>
+
+      {/* 🎁 Redeem Rewards & City Perks Modal */}
+      {showRedeemModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="bg-white border border-amber-200 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 relative overflow-hidden">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider border border-amber-300">
+                  Municipal Reward Store
+                </span>
+                <h3 className="text-xl font-black text-slate-900 mt-1">
+                  Redeem Civic Karma Coins
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Current Balance: <strong className="text-amber-800 font-black">🪙 {user?.coins || 0} Coins</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setShowRedeemModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+              {/* Voucher 1 */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 hover:border-amber-400 transition-all">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🚇</span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">Pune Metro Daily Pass</div>
+                    <div className="text-[11px] text-slate-500">Free 1-Day unlimited metro rides</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => showToast('🎉 Pune Metro Pass voucher code sent to your registered email!', 'success')}
+                  disabled={(user?.coins || 0) < 150}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                >
+                  150 🪙
+                </button>
+              </div>
+
+              {/* Voucher 2 */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 hover:border-amber-400 transition-all">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🏛️</span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">PMC Property Tax Rebate</div>
+                    <div className="text-[11px] text-slate-500">₹250 rebate on annual municipal assessment</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => showToast('🎉 Tax rebate coupon registered under your Citizen ID!', 'success')}
+                  disabled={(user?.coins || 0) < 300}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                >
+                  300 🪙
+                </button>
+              </div>
+
+              {/* Voucher 3 */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 hover:border-amber-400 transition-all">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🌳</span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-900">Smart City Green Hero Certificate</div>
+                    <div className="text-[11px] text-slate-500">Municipal Tree Plantation named in your honor</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => showToast('🎉 Green Citizen certificate generated & tree tagged in Shivaji Nagar!', 'success')}
+                  disabled={(user?.coins || 0) < 100}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                >
+                  100 🪙
+                </button>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setShowRedeemModal(false)}
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+              >
+                Close Store
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

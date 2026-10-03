@@ -164,7 +164,26 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       });
     }
 
-    // 6. Audit Log
+    // 6. Award Civic Credit Coins / Karma Points to Citizen
+    const hasPhoto = images && images.length > 0;
+    const hasDetailedText = description && description.length >= 20;
+    const coinsEarned = 50 + (hasPhoto ? 25 : 0) + (hasDetailedText ? 25 : 0);
+    const rewardInfo = db.awardCoins(
+      req.user.id,
+      coinsEarned,
+      `Reported ${resolvedCategory} on ${cleanRoadName}`
+    ) || { coinsEarned, totalCoins: (req.user.coins || 0) + coinsEarned };
+
+    // Add Coin Reward Notification
+    db.addNotification({
+      userId: req.user.id,
+      type: 'REWARD_EARNED',
+      title: `🪙 +${coinsEarned} Civic Coins Awarded!`,
+      message: `You earned ${coinsEarned} Civic Coins (${hasPhoto ? '+25 Photo bonus ' : ''}${hasDetailedText ? '+25 AI details ' : ''}) for reporting on ${cleanRoadName}! Balance: ${rewardInfo.totalCoins} Coins.`,
+      issueId: masterIssue.id
+    });
+
+    // 7. Audit Log
     db.addAuditLog({
       userId: req.user.id,
       userName: req.user.name,
@@ -174,16 +193,26 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       targetId: newComplaint.id,
       oldStatus: null,
       newStatus: newComplaint.status,
-      details: `Citizen submitted complaint on ${cleanRoadName}. Linked to Master Issue #${masterIssue.id} with Priority ${masterIssue.priorityScore}/100.`
+      details: `Citizen submitted complaint on ${cleanRoadName}. Earned +${coinsEarned} Civic Coins. Linked to Master Issue #${masterIssue.id} with Priority ${masterIssue.priorityScore}/100.`
     });
 
     res.status(201).json({
       success: true,
       message: isNew
-        ? 'Complaint registered and assigned to Master Road Hub.'
-        : `Smart Duplicate Engine correlated your complaint with ${masterIssue.complaintCount - 1} existing reports on this road!`,
+        ? `Complaint registered! You earned +${coinsEarned} Civic Coins.`
+        : `Smart Duplicate Engine correlated your complaint with ${masterIssue.complaintCount - 1} existing reports on this road! (+${coinsEarned} Coins)`,
       complaint: newComplaint,
-      masterIssue
+      masterIssue,
+      reward: {
+        coinsEarned,
+        totalCoins: rewardInfo.totalCoins,
+        reason: 'Civic Hazard Reported',
+        breakdown: [
+          { item: 'Base Civic Bounty', amount: 50 },
+          ...(hasPhoto ? [{ item: 'Photo Evidence Bonus', amount: 25 }] : []),
+          ...(hasDetailedText ? [{ item: 'Detailed Description Bonus', amount: 25 }] : [])
+        ]
+      }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to submit complaint', error: err.message });
@@ -313,6 +342,13 @@ router.post('/:id/verify-resolution', authenticateToken, requireRole('CITIZEN', 
         });
       }
 
+      // Award +100 Civic Coins for resolution quality verification
+      const verifyReward = db.awardCoins(
+        req.user.id,
+        100,
+        `Verified fix for ${complaint.roadName}`
+      ) || { coinsEarned: 100, totalCoins: (req.user.coins || 0) + 100 };
+
       // Audit Log
       db.addAuditLog({
         userId: req.user.id,
@@ -323,13 +359,18 @@ router.post('/:id/verify-resolution', authenticateToken, requireRole('CITIZEN', 
         targetId: complaint.id,
         oldStatus: 'RESOLUTION SUBMITTED',
         newStatus: 'COMPLETED',
-        details: `Citizen ${req.user.name} verified fix as successful. Issue closed.`
+        details: `Citizen ${req.user.name} verified fix as successful. Earned +100 Civic Coins. Issue closed.`
       });
 
       return res.json({
         success: true,
-        message: 'Resolution verified! The civic issue has been marked as COMPLETED.',
-        status: 'COMPLETED'
+        message: 'Resolution verified! The civic issue has been marked as COMPLETED. (+100 Coins Awarded 🎉)',
+        status: 'COMPLETED',
+        reward: {
+          coinsEarned: 100,
+          totalCoins: verifyReward.totalCoins,
+          reason: 'Quality Resolution Verification'
+        }
       });
     } else {
       // Rejected by Citizen -> Reopen Issue

@@ -23,7 +23,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
-  const { user, showToast } = useAuth();
+  const { user, showToast, updateCoins } = useAuth();
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Pothole');
   const [roadName, setRoadName] = useState('Ward 12 Main Road');
@@ -35,6 +35,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
+  const [rewardModal, setRewardModal] = useState(null); // Reward modal after submission
 
   // Live Camera states & refs
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -257,9 +258,16 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         return;
       }
 
-      showToast(data.message, 'success');
       if (onComplaintSubmitted) onComplaintSubmitted(data.complaint);
-      setCurrentTab('citizen_dashboard');
+
+      if (data.reward) {
+        updateCoins(data.reward.totalCoins);
+        setRewardModal(data.reward);
+        showToast(`🪙 +${data.reward.coinsEarned} Civic Coins Credited!`, 'success');
+      } else {
+        showToast(data.message, 'success');
+        setCurrentTab('citizen_dashboard');
+      }
     } catch (err) {
       showToast('Error submitting complaint', 'error');
     } finally {
@@ -657,31 +665,121 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         </div>
 
         {/* Submit Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => setCurrentTab('citizen_dashboard')}
-            className="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
-          >
-            Cancel
-          </button>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+          {/* Potential Reward Incentive Hint */}
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-50 px-3.5 py-2 rounded-2xl border border-amber-200 shadow-xs">
+            <span className="text-base select-none">🪙</span>
+            <span>Reward Bounty: <strong>+{50 + (imageUrl ? 25 : 0) + (description.length >= 20 ? 25 : 0)} Civic Coins</strong> on submission</span>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-600/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-          >
-            {loading ? (
-              <span>AI Processing & Submitting...</span>
-            ) : (
-              <>
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Submit Complaint to Authority</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <button
+              type="button"
+              onClick={() => setCurrentTab('citizen_dashboard')}
+              className="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-extrabold text-xs shadow-lg shadow-blue-600/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              {loading ? (
+                <span>AI Processing & Submitting...</span>
+              ) : (
+                <>
+                  <span className="text-sm select-none">🪙</span>
+                  <span>Submit Complaint to Authority (+{50 + (imageUrl ? 25 : 0) + (description.length >= 20 ? 25 : 0)} Coins)</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
+
+      {/* 🎉 Celebratory Credit Coins Reward Modal */}
+      {rewardModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 animate-fadeIn">
+          <div className="bg-white border border-amber-200 rounded-3xl max-w-md w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden">
+            {/* Glowing background halo */}
+            <div className="absolute -top-24 -right-24 w-60 h-60 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Big Animated Coin Icon */}
+            <div className="relative mx-auto w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 flex items-center justify-center shadow-xl shadow-amber-500/30 border-4 border-white animate-bounce">
+              <span className="text-4xl select-none">🪙</span>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider border border-amber-300">
+                Civic Karma Awarded!
+              </span>
+              <h3 className="text-2xl font-black text-slate-900">
+                +{rewardModal.coinsEarned} Civic Coins
+              </h3>
+              <p className="text-xs text-slate-600">
+                Thank you for being an active citizen and helping keep Pune clean and safe!
+              </p>
+            </div>
+
+            {/* Coins Breakdown Box */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2">
+              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200">
+                Reward Breakdown
+              </div>
+              {rewardModal.breakdown ? (
+                rewardModal.breakdown.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center text-xs font-semibold text-slate-700">
+                    <span>{item.item}</span>
+                    <span className="text-emerald-600 font-extrabold">+{item.amount} 🪙</span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
+                  <span>Verified Civic Submission</span>
+                  <span className="text-emerald-600 font-extrabold">+{rewardModal.coinsEarned} 🪙</span>
+                </div>
+              )}
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-black text-slate-900">
+                <span>New Wallet Balance:</span>
+                <span className="text-amber-800 text-sm font-extrabold">🪙 {rewardModal.totalCoins} Coins</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
+              💡 <strong>Civic Perks:</strong> Redeem coins on your Citizen Dashboard for Pune Metro passes, municipal property tax rebates, and verified badge certificates.
+            </div>
+
+            {/* Modal Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRewardModal(null);
+                  setDescription('');
+                  setImageUrl('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80');
+                  setAiAnalysis(null);
+                }}
+                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
+              >
+                Report Another Issue
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setRewardModal(null);
+                  setCurrentTab('citizen_dashboard');
+                }}
+                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-600/25 transition-all"
+              >
+                View Dashboard ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
