@@ -23,7 +23,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 
 export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
-  const { user, showToast, updateCoins } = useAuth();
+  const { user, token, showToast, updateCoins } = useAuth();
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Pothole');
   const [roadName, setRoadName] = useState('Ward 12 Main Road');
@@ -34,6 +34,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const [loading, setLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [showPresets, setShowPresets] = useState(true); // Toggle sample preset cards
   const [rewardModal, setRewardModal] = useState(null); // Reward modal after submission
   const [countdown, setCountdown] = useState(3); // 3-second coin showcase timer
 

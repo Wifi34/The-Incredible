@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 
 // 1. AI Real-time Image & Text Analyzer (Preview before submitting)
-router.post('/ai-analyze', authenticateToken, async (req, res) => {
+router.post('/ai-analyze', async (req, res) => {
   try {
     const { text, imageUrl, userCategory } = req.body;
 

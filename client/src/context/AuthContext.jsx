@@ -21,7 +21,26 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const fetchMe = async () => {
       if (!token) {
-        // Default guest / seed session for instant preview
+        // Auto-authenticate default demo citizen session for seamless instant access
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: 'citizen@civicsense.gov', password: 'Citizen@123' })
+          });
+          const data = await res.json();
+          if (data.success && data.token) {
+            localStorage.setItem('civicsense_token', data.token);
+            setToken(data.token);
+            setUser(data.user);
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.warn('Auto demo login fallback:', e);
+        }
+
+        // Fallback guest session
         setUser({
           id: 'usr_citizen_1',
           name: 'Rahul Sharma',

@@ -173,8 +173,16 @@ Return a valid JSON object ONLY with no markdown formatting:
       contents: prompt
     });
 
-    const cleanText = response.text.replace(/```json/g, '').replace(/```/g, '').trim();
-    const result = JSON.parse(cleanText);
+    const responseText = response.text || '';
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    let result = {};
+    if (jsonMatch) {
+      try {
+        result = JSON.parse(jsonMatch[0]);
+      } catch (parseErr) {
+        console.warn('JSON parse error from Gemini text:', parseErr.message);
+      }
+    }
 
     return {
       category: result.category || userCategory || 'Pothole',
@@ -182,7 +190,7 @@ Return a valid JSON object ONLY with no markdown formatting:
       severity: result.severity || 'MEDIUM',
       severityScore: result.severityScore || 70,
       detectedHazards: result.detectedHazards || [],
-      detectedSummary: result.summary || `AI classified as ${result.category}.`,
+      detectedSummary: result.summary || `AI classified as ${result.category || userCategory || 'Pothole'}.`,
       departmentRecommended: result.departmentRecommended || 'Road & Highway Infrastructure',
       multipleIssuesDetected: Boolean(result.multipleIssuesDetected),
       secondaryCategories: result.secondaryCategories || [],
