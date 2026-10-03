@@ -188,8 +188,68 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
 
+  // Helper to determine exact Nagpur Ward from address text or coordinates
+  const resolveWardFromAddressOrCoords = (addressText = '', lat = null, lng = null) => {
+    const lower = (addressText || '').toLowerCase();
+
+    if (
+      lower.includes('it park') || lower.includes('gayatri') || lower.includes('vnit') ||
+      lower.includes('pratap') || lower.includes('mate') || lower.includes('wardha') ||
+      lower.includes('hingna') || lower.includes('parsodi') || lower.includes('trimurti') ||
+      lower.includes('jaitala') || lower.includes('khamla') || lower.includes('sonegaon') ||
+      lower.includes('airport') || lower.includes('somalwada') || lower.includes('manewada')
+    ) {
+      return 'ward_7';
+    }
+
+    if (
+      lower.includes('sitabuldi') || lower.includes('variety') || lower.includes('cotton market') ||
+      lower.includes('central avenue') || lower.includes('munje') || lower.includes('tekdi') ||
+      lower.includes('railway station') || lower.includes('mayo') || lower.includes('ganeshpeth') ||
+      lower.includes('burdi') || lower.includes('dhantoli') || lower.includes('ramdaspeth')
+    ) {
+      return 'ward_8';
+    }
+
+    if (
+      lower.includes('mahal') || lower.includes('gandhibagh') || lower.includes('badkas') ||
+      lower.includes('gandhi sagar') || lower.includes('tilak') || lower.includes('chitnavis') ||
+      lower.includes('itwari') || lower.includes('hansapuri') || lower.includes('reshimbagh') ||
+      lower.includes('nandanvan') || lower.includes('sakkardara') || lower.includes('mominpura') ||
+      lower.includes('mankapur') || lower.includes('koradi') || lower.includes('civil lines')
+    ) {
+      return 'ward_5';
+    }
+
+    if (
+      lower.includes('dharampeth') || lower.includes('whc') || lower.includes('west high court') ||
+      lower.includes('law college') || lower.includes('gokulpeth') || lower.includes('ram nagar') ||
+      lower.includes('coffee house') || lower.includes('shankar nagar') || lower.includes('shivaji nagar') ||
+      lower.includes('laxmi nagar') || lower.includes('bajaj nagar') || lower.includes('ravi nagar') ||
+      lower.includes('futala') || lower.includes('seminary')
+    ) {
+      return 'ward_12';
+    }
+
+    // Fallback to closest Ward coordinates
+    if (lat && lng) {
+      let closestWard = 'ward_12';
+      let minDis = 9999999;
+      for (const [wId, info] of Object.entries(WARD_INFO)) {
+        const d = Math.hypot(lat - info.coords.lat, lng - info.coords.lng);
+        if (d < minDis) {
+          minDis = d;
+          closestWard = wId;
+        }
+      }
+      return closestWard;
+    }
+
+    return 'ward_12';
+  };
+
   // Helper to reverse geocode Lat/Lng into live street / landmark name
-  const getAddressFromCoords = async (latitude, longitude, closestWard) => {
+  const getAddressFromCoords = async (latitude, longitude) => {
     let detectedRoad = '';
 
     // 1. Try OpenStreetMap Nominatim
@@ -239,15 +299,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       }
     }
 
-    // 3. Guaranteed fallback to closest Ward default road
-    if (!detectedRoad || detectedRoad.includes('undefined')) {
-      detectedRoad = WARD_INFO[closestWard]?.defaultRoad || 'West High Court (WHC) Road, Dharampeth';
-    }
-
     return detectedRoad;
   };
 
-  // Live GPS Auto-Detect Handler with Real Reverse Geocoding
+  // Live GPS Auto-Detect Handler with Real Reverse Geocoding & Ward Sync
   const detectGpsLocation = () => {
     if (!navigator.geolocation) {
       showToast('Geolocation is not supported by your browser', 'error');
@@ -261,23 +316,21 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         setGpsCoords({ lat: latitude, lng: longitude });
         setGpsLocked(true);
 
-        // 1. Calculate closest Ward
-        let closestWard = 'ward_12';
-        let minDis = 9999999;
-        for (const [wId, info] of Object.entries(WARD_INFO)) {
-          const d = Math.hypot(latitude - info.coords.lat, longitude - info.coords.lng);
-          if (d < minDis) {
-            minDis = d;
-            closestWard = wId;
-          }
-        }
+        // 1. Fetch raw reverse geocoded address
+        const rawAddress = await getAddressFromCoords(latitude, longitude);
 
-        // 2. Set Ward & resolve live Road / Landmark name
-        setWardId(closestWard);
-        const resolvedAddress = await getAddressFromCoords(latitude, longitude, closestWard);
-        setRoadName(resolvedAddress);
+        // 2. Calculate and lock the exact matching Municipal Ward
+        const matchedWard = resolveWardFromAddressOrCoords(rawAddress, latitude, longitude);
+        setWardId(matchedWard);
+
+        // 3. Set the live Road / Landmark name
+        const finalRoadName = rawAddress && !rawAddress.includes('undefined')
+          ? rawAddress
+          : WARD_INFO[matchedWard]?.defaultRoad || 'West High Court (WHC) Road, Dharampeth';
+
+        setRoadName(finalRoadName);
         setGpsDetecting(false);
-        showToast(`📍 Live GPS Locked: ${resolvedAddress}`, 'success');
+        showToast(`📍 Live GPS: ${finalRoadName} (${WARD_INFO[matchedWard]?.name.split('-')[0]})`, 'success');
       },
       (err) => {
         setGpsDetecting(false);
@@ -290,6 +343,16 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  };
+
+  // Custom Road input change with auto Ward detection
+  const handleRoadNameChange = (newRoad) => {
+    setRoadName(newRoad);
+    const autoWard = resolveWardFromAddressOrCoords(newRoad);
+    if (autoWard && autoWard !== wardId) {
+      setWardId(autoWard);
+      setGpsCoords(WARD_INFO[autoWard]?.coords || { lat: 21.1425, lng: 79.0620 });
+    }
   };
 
   // 1. Live Camera Stream Management
@@ -922,7 +985,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               <input
                 type="text"
                 value={roadName}
-                onChange={(e) => setRoadName(e.target.value)}
+                onChange={(e) => handleRoadNameChange(e.target.value)}
                 placeholder="e.g. West High Court (WHC) Road, Dharampeth"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 font-medium"
               />
@@ -956,7 +1019,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                 <button
                   key={idx}
                   type="button"
-                  onClick={() => setRoadName(lm)}
+                  onClick={() => handleRoadNameChange(lm)}
                   className={`px-2.5 py-1 rounded-lg text-[11px] border transition-all ${
                     roadName === lm
                       ? 'bg-blue-100 text-blue-800 border-blue-300 font-bold shadow-xs'
