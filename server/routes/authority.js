@@ -5,10 +5,58 @@ import { recommendBestTeam, verifyResolutionAI } from '../aiService.js';
 
 const router = express.Router();
 
-// Middleware: Only AUTHORITY and ADMIN can access
+// 1. Public Master Road Issues List (for GIS Map & Citizen Transparency)
+router.get('/master-issues', (req, res) => {
+  try {
+    const { status, severity, category } = req.query;
+    let issues = db.masterIssues;
+
+    if (status) issues = issues.filter(m => m.status === status);
+    if (severity) issues = issues.filter(m => m.severity === severity);
+    if (category) issues = issues.filter(m => m.category === category);
+
+    res.json({ success: true, count: issues.length, masterIssues: issues });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Error fetching master issues', error: err.message });
+  }
+});
+
+// 2. Public Single Master Issue Details
+router.get('/master-issues/:id', (req, res) => {
+  try {
+    const master = db.getMasterIssueById(req.params.id);
+    if (!master) {
+      return res.status(404).json({ success: false, message: 'Master issue not found' });
+    }
+
+    const linkedComplaints = db.complaints.filter(c => master.complaintIds.includes(c.id));
+    const timeline = db.getTimelineUpdates(master.id);
+    const assignedTeam = master.assignedTeamId ? db.teams.find(t => t.id === master.assignedTeamId) : null;
+    const recommendation = recommendBestTeam(db, master);
+    const ward = db.wards.find(w => w.id === master.wardId);
+    const dept = db.departments.find(d => d.id === master.departmentId);
+    const availableTeams = db.teams.filter(t => t.departmentId === master.departmentId);
+
+    res.json({
+      success: true,
+      masterIssue: master,
+      linkedComplaints,
+      timeline,
+      assignedTeam,
+      recommendation,
+      availableTeams,
+      ward,
+      dept
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to retrieve master issue details', error: err.message });
+  }
+});
+
+// Middleware for all subsequent operations: Only AUTHORITY and ADMIN can access
 router.use(authenticateToken, requireRole('AUTHORITY', 'ADMIN'));
 
-// 1. Authority Priority Queue (Smart AI Sorted)
+// 3. Authority Priority Queue (Smart AI Sorted)
 router.get('/priority-queue', (req, res) => {
   try {
     const isAuthority = req.user.role === 'AUTHORITY';
@@ -16,7 +64,6 @@ router.get('/priority-queue', (req, res) => {
 
     if (isAuthority) {
       issues = issues.filter(m => {
-        // If authority has ward/dept assigned, prioritize their jurisdiction
         if (req.user.wardId && m.wardId !== req.user.wardId) return false;
         if (req.user.departmentId && m.departmentId !== req.user.departmentId) return false;
         return true;
@@ -46,59 +93,6 @@ router.get('/priority-queue', (req, res) => {
     res.json({ success: true, count: enriched.length, priorityQueue: enriched });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to load priority queue', error: err.message });
-  }
-});
-
-// 2. Get Master Road Issues
-router.get('/master-issues', (req, res) => {
-  try {
-    const { status, severity, category } = req.query;
-    let issues = db.masterIssues;
-
-    if (req.user.role === 'AUTHORITY') {
-      if (req.user.wardId) issues = issues.filter(m => m.wardId === req.user.wardId);
-      if (req.user.departmentId) issues = issues.filter(m => m.departmentId === req.user.departmentId);
-    }
-
-    if (status) issues = issues.filter(m => m.status === status);
-    if (severity) issues = issues.filter(m => m.severity === severity);
-    if (category) issues = issues.filter(m => m.category === category);
-
-    res.json({ success: true, count: issues.length, masterIssues: issues });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Error fetching master issues', error: err.message });
-  }
-});
-
-// 3. Get Single Master Issue Details with Linked Complaints & Timeline
-router.get('/master-issues/:id', (req, res) => {
-  try {
-    const master = db.getMasterIssueById(req.params.id);
-    if (!master) {
-      return res.status(404).json({ success: false, message: 'Master issue not found' });
-    }
-
-    const linkedComplaints = db.complaints.filter(c => master.complaintIds.includes(c.id));
-    const timeline = db.getTimelineUpdates(master.id);
-    const assignedTeam = master.assignedTeamId ? db.teams.find(t => t.id === master.assignedTeamId) : null;
-    const recommendation = recommendBestTeam(db, master);
-    const ward = db.wards.find(w => w.id === master.wardId);
-    const dept = db.departments.find(d => d.id === master.departmentId);
-    const availableTeams = db.teams.filter(t => t.departmentId === master.departmentId);
-
-    res.json({
-      success: true,
-      masterIssue: master,
-      linkedComplaints,
-      timeline,
-      assignedTeam,
-      recommendation,
-      availableTeams,
-      ward,
-      dept
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to retrieve master issue details', error: err.message });
   }
 });
 

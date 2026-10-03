@@ -9,8 +9,72 @@ import {
   Navigation,
   Eye,
   Zap,
-  MapPin
+  MapPin,
+  Compass
 } from 'lucide-react';
+
+// Helper to determine category icon, color palette and label
+export const getCategoryMeta = (category) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('pothole') || cat.includes('road')) {
+    return {
+      key: 'Pothole',
+      label: 'Pothole & Road Damage',
+      symbol: '🚧',
+      iconEmoji: '🚧',
+      color: '#e11d48', // Rose 600
+      glowColor: 'rgba(225, 29, 72, 0.35)',
+      badgeBg: 'bg-rose-50 text-rose-700 border-rose-200',
+      pillActive: 'bg-rose-600 text-white shadow-rose-500/20'
+    };
+  }
+  if (cat.includes('garbage') || cat.includes('dump') || cat.includes('waste') || cat.includes('sanitation')) {
+    return {
+      key: 'Garbage',
+      label: 'Garbage & Sanitation',
+      symbol: '🗑️',
+      iconEmoji: '🗑️',
+      color: '#ea580c', // Orange 600
+      glowColor: 'rgba(234, 88, 12, 0.35)',
+      badgeBg: 'bg-orange-50 text-orange-700 border-orange-200',
+      pillActive: 'bg-orange-600 text-white shadow-orange-500/20'
+    };
+  }
+  if (cat.includes('light') || cat.includes('lamp') || cat.includes('electric')) {
+    return {
+      key: 'Streetlight',
+      label: 'Broken Streetlight',
+      symbol: '💡',
+      iconEmoji: '💡',
+      color: '#d97706', // Amber 600
+      glowColor: 'rgba(217, 119, 6, 0.35)',
+      badgeBg: 'bg-amber-50 text-amber-800 border-amber-200',
+      pillActive: 'bg-amber-600 text-white shadow-amber-500/20'
+    };
+  }
+  if (cat.includes('drain') || cat.includes('water') || cat.includes('sewage') || cat.includes('leak')) {
+    return {
+      key: 'Drainage',
+      label: 'Drainage & Water Defect',
+      symbol: '💧',
+      iconEmoji: '💧',
+      color: '#0284c7', // Sky 600
+      glowColor: 'rgba(2, 132, 199, 0.35)',
+      badgeBg: 'bg-sky-50 text-sky-700 border-sky-200',
+      pillActive: 'bg-sky-600 text-white shadow-sky-500/20'
+    };
+  }
+  return {
+    key: 'Other',
+    label: category || 'Civic Hazard',
+    symbol: '📍',
+    iconEmoji: '📍',
+    color: '#64748b',
+    glowColor: 'rgba(100, 116, 139, 0.35)',
+    badgeBg: 'bg-slate-100 text-slate-700 border-slate-200',
+    pillActive: 'bg-slate-800 text-white'
+  };
+};
 
 export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCategory = 'ALL' }) {
   const mapContainerRef = useRef(null);
@@ -28,7 +92,7 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
     if (!mapInstanceRef.current) {
       // Centered on Pune Civic District
       const map = L.map(mapContainerRef.current, {
-        center: [18.5314, 73.8567],
+        center: [18.5284, 73.8567],
         zoom: 13,
         zoomControl: false
       });
@@ -41,17 +105,13 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
         maxZoom: 19
       }).addTo(map);
 
-      markersLayerRef.current = L.layerGroup().addTo(map);
       heatmapLayerRef.current = L.layerGroup().addTo(map);
+      markersLayerRef.current = L.layerGroup().addTo(map);
       mapInstanceRef.current = map;
     }
-
-    return () => {
-      // keep instance intact or cleanup if unmounting
-    };
   }, []);
 
-  // Update Markers & Hotspot Circles when data or filters change
+  // Update Markers, Area Hotspot Circles & Auto-Fly to targeted area on category switch
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
 
@@ -60,69 +120,102 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
 
     const filtered = masterIssues.filter(m => {
       if (activeCategory === 'ALL') return true;
-      if (activeCategory === 'Pothole' && (m.category === 'Pothole' || m.category === 'Road Damage')) return true;
-      if (activeCategory === 'Garbage' && (m.category === 'Garbage' || m.category === 'Illegal Dumping')) return true;
-      if (activeCategory === 'Streetlight' && m.category === 'Broken Streetlight') return true;
-      if (activeCategory === 'Drainage' && (m.category === 'Open Drain' || m.category === 'Water Leakage')) return true;
-      return m.category === activeCategory;
+      const meta = getCategoryMeta(m.category);
+      return meta.key === activeCategory;
     });
 
+    // Auto-Focus / FlyToBounds when category is selected
+    if (filtered.length > 0) {
+      const latLngs = filtered.map(item => [
+        item.location?.lat || 18.5314,
+        item.location?.lng || 73.8446
+      ]);
+
+      if (filtered.length === 1) {
+        mapInstanceRef.current.flyTo(latLngs[0], 15, {
+          duration: 1.0,
+          easeLinearity: 0.25
+        });
+      } else {
+        const bounds = L.latLngBounds(latLngs);
+        mapInstanceRef.current.flyToBounds(bounds.pad(0.25), {
+          duration: 1.0,
+          maxZoom: 14
+        });
+      }
+    }
+
+    // Render Markers & Area Circles
     filtered.forEach(issue => {
       const lat = issue.location?.lat || 18.5314;
       const lng = issue.location?.lng || 73.8446;
+      const meta = getCategoryMeta(issue.category);
 
-      // Color mapping
-      let color = '#0284c7'; // Blue
-      let pulseClass = '';
-      if (issue.severity === 'CRITICAL' || issue.priorityScore >= 81) {
-        color = '#e11d48'; // Red
-        pulseClass = 'animate-ping';
-      } else if (issue.severity === 'HIGH' || issue.priorityScore >= 61) {
-        color = '#ea580c'; // Orange
-      } else if (issue.priorityScore >= 31) {
-        color = '#d97706'; // Amber
-      } else {
-        color = '#059669'; // Emerald
-      }
-
-      // Heatmap glow circle if enabled
+      // 1. Area Hotspot / Incident Zone Circle
       if (showHeatmap && heatmapLayerRef.current) {
-        const radius = Math.min(600, 150 + issue.complaintCount * 22);
-        const heatCircle = L.circle([lat, lng], {
+        const radius = Math.min(650, 180 + issue.complaintCount * 22);
+        const areaCircle = L.circle([lat, lng], {
           radius,
-          fillColor: color,
-          fillOpacity: issue.isHotspot ? 0.35 : 0.18,
-          color: color,
-          weight: 1.5,
-          opacity: 0.7
+          fillColor: meta.color,
+          fillOpacity: issue.isHotspot ? 0.25 : 0.14,
+          color: meta.color,
+          weight: issue.isHotspot ? 2 : 1.2,
+          dashArray: issue.isHotspot ? '4, 4' : null,
+          opacity: 0.8
         });
-        heatCircle.addTo(heatmapLayerRef.current);
+
+        areaCircle.bindTooltip(`
+          <div class="px-2 py-1 text-[11px] font-bold">
+            <span class="mr-1">${meta.symbol}</span>
+            <span>${issue.roadName} (${issue.complaintCount} reports)</span>
+          </div>
+        `, { direction: 'top', className: 'civic-map-tooltip' });
+
+        areaCircle.addTo(heatmapLayerRef.current);
       }
 
-      // Custom pulsing HTML marker pin
+      // 2. Custom Category Symbol Pin Marker
       const iconHtml = `
-        <div class="relative flex items-center justify-center cursor-pointer group">
-          ${issue.isHotspot ? `<div class="absolute w-10 h-10 rounded-full ${pulseClass}" style="background-color: ${color}; opacity: 0.35;"></div>` : ''}
-          <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-extrabold text-[11px] shadow-lg border-2 border-white transition-transform transform group-hover:scale-125" style="background-color: ${color};">
-            ${issue.complaintCount}
+        <div class="relative flex items-center justify-center cursor-pointer group transform transition-transform duration-200 hover:scale-125">
+          <!-- Pulsing Danger Wave for Hotspots -->
+          ${issue.isHotspot ? `
+            <div class="absolute -inset-2 rounded-full animate-ping opacity-35" style="background-color: ${meta.color};"></div>
+          ` : ''}
+
+          <!-- Outer Pin Body -->
+          <div class="relative flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-xl border-2 transition-all"
+                 style="border-color: ${meta.color}; box-shadow: 0 4px 14px ${meta.glowColor};">
+              <span class="text-base select-none">${meta.symbol}</span>
+
+              <!-- Floating Complaint Count Badge -->
+              <span class="absolute -top-1.5 -right-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-black text-white shadow-sm border border-white"
+                    style="background-color: ${meta.color}; min-width: 18px; text-align: center;">
+                ${issue.complaintCount}
+              </span>
+            </div>
+
+            <!-- Pin Bottom Pointer -->
+            <div class="w-2 h-2 -mt-1 rotate-45 border-r-2 border-b-2 bg-white"
+                 style="border-color: ${meta.color};"></div>
           </div>
-          <div class="absolute -bottom-1 w-2 h-2 rotate-45 border-r-2 border-b-2 border-white" style="background-color: ${color};"></div>
         </div>
       `;
 
       const customIcon = L.divIcon({
         html: iconHtml,
-        className: 'custom-map-pin',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32]
+        className: 'custom-civic-pin',
+        iconSize: [40, 46],
+        iconAnchor: [20, 44]
       });
 
       const marker = L.marker([lat, lng], { icon: customIcon });
 
+      // Click Handler
       marker.on('click', () => {
         setSelectedMarkerData(issue);
         if (mapInstanceRef.current) {
-          mapInstanceRef.current.panTo([lat, lng]);
+          mapInstanceRef.current.flyTo([lat, lng], 16, { duration: 0.8 });
         }
       });
 
@@ -130,126 +223,175 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
     });
   }, [masterIssues, activeCategory, showHeatmap]);
 
-  const categories = ['ALL', 'Pothole', 'Garbage', 'Streetlight', 'Drainage'];
+  // Compute category statistics for filter tabs
+  const categoryCounts = {
+    ALL: masterIssues.length,
+    Pothole: masterIssues.filter(m => getCategoryMeta(m.category).key === 'Pothole').length,
+    Garbage: masterIssues.filter(m => getCategoryMeta(m.category).key === 'Garbage').length,
+    Streetlight: masterIssues.filter(m => getCategoryMeta(m.category).key === 'Streetlight').length,
+    Drainage: masterIssues.filter(m => getCategoryMeta(m.category).key === 'Drainage').length
+  };
+
+  const filterTabs = [
+    { key: 'ALL', label: 'All Issues', symbol: '🌐' },
+    { key: 'Pothole', label: 'Potholes', symbol: '🚧' },
+    { key: 'Garbage', label: 'Garbage', symbol: '🗑️' },
+    { key: 'Streetlight', label: 'Streetlights', symbol: '💡' },
+    { key: 'Drainage', label: 'Drainage', symbol: '💧' }
+  ];
 
   return (
-    <div className="relative w-full h-[520px] rounded-3xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+    <div className="relative w-full h-[540px] rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-white">
       {/* Category Filter Pills on Top of Map */}
-      <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 shadow-md flex flex-wrap items-center gap-1.5">
-        <div className="flex items-center gap-1 px-2 text-xs font-bold text-slate-500">
-          <Filter className="w-3.5 h-3.5" />
-          <span>Filter:</span>
+      <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 shadow-lg flex flex-wrap items-center gap-1.5 max-w-[calc(100%-2rem)] sm:max-w-none">
+        <div className="flex items-center gap-1 px-2 text-xs font-extrabold text-slate-600">
+          <Filter className="w-3.5 h-3.5 text-blue-600" />
+          <span>Category:</span>
         </div>
 
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
-              activeCategory === cat
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {filterTabs.map(tab => {
+          const isActive = activeCategory === tab.key;
+          const count = categoryCounts[tab.key] || 0;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveCategory(tab.key)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                isActive
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-105'
+                  : 'bg-slate-50 text-slate-700 hover:text-slate-900 hover:bg-slate-100 border border-slate-200/60'
+              }`}
+            >
+              <span>{tab.symbol}</span>
+              <span>{tab.label}</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
 
         <button
           onClick={() => setShowHeatmap(!showHeatmap)}
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
             showHeatmap
-              ? 'bg-rose-50 text-rose-700 border-rose-200 shadow-xs'
-              : 'bg-slate-100 text-slate-600 border-slate-200'
+              ? 'bg-rose-50 text-rose-700 border-rose-200 shadow-sm'
+              : 'bg-slate-50 text-slate-600 border-slate-200'
           }`}
         >
           <Flame className="w-3.5 h-3.5 text-rose-600" />
-          Heatmap: {showHeatmap ? 'ON' : 'OFF'}
+          <span>Area Zones: {showHeatmap ? 'ON' : 'OFF'}</span>
+        </button>
+      </div>
+
+      {/* Recenter & Active Filter Indicator */}
+      <div className="absolute top-4 right-4 z-[999] hidden sm:flex items-center gap-2">
+        <button
+          onClick={() => {
+            if (mapInstanceRef.current) {
+              mapInstanceRef.current.flyTo([18.5284, 73.8567], 13, { duration: 1.0 });
+            }
+          }}
+          className="px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 text-xs font-bold shadow-md flex items-center gap-1.5 transition-all"
+        >
+          <Compass className="w-3.5 h-3.5 text-blue-600" />
+          <span>Reset View</span>
         </button>
       </div>
 
       {/* Legend Badge */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-200 text-[11px] font-bold text-slate-700 flex items-center gap-4 shadow-md">
+      <div className="absolute bottom-4 left-4 z-[1000] bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-slate-200 text-[11px] font-bold text-slate-700 flex flex-wrap items-center gap-3.5 shadow-lg">
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-rose-600 shadow-xs"></span>
-          <span>Critical (81–100)</span>
+          <span className="text-sm">🚧</span>
+          <span>Potholes</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-orange-600 shadow-xs"></span>
-          <span>High (61–80)</span>
+          <span className="text-sm">🗑️</span>
+          <span>Garbage</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-amber-500 shadow-xs"></span>
-          <span>Medium (31–60)</span>
+          <span className="text-sm">💡</span>
+          <span>Streetlights</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-emerald-600 shadow-xs"></span>
-          <span>Low (0–30)</span>
+          <span className="text-sm">💧</span>
+          <span>Drainage</span>
         </div>
       </div>
 
       {/* Selected Marker Detail Card Overlay */}
       {selectedMarkerData && (
-        <div className="absolute top-4 right-4 z-[1000] w-84 bg-white/95 backdrop-blur-xl rounded-3xl border border-slate-200 shadow-2xl p-5 text-slate-800 animate-fadeIn">
-          <div className="flex items-start justify-between">
-            <span
-              className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border ${
-                selectedMarkerData.severity === 'CRITICAL'
-                  ? 'bg-rose-50 text-rose-700 border-rose-200'
-                  : 'bg-orange-50 text-orange-700 border-orange-200'
-              }`}
-            >
-              {selectedMarkerData.severity} PRIORITY ({selectedMarkerData.priorityScore}/100)
-            </span>
-            <button
-              onClick={() => setSelectedMarkerData(null)}
-              className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs font-bold transition-all"
-            >
-              ✕
-            </button>
-          </div>
+        <div className="absolute top-16 right-4 z-[1000] w-88 bg-white/95 backdrop-blur-xl rounded-3xl border border-slate-200 shadow-2xl p-5 text-slate-800 animate-fadeIn">
+          {(() => {
+            const meta = getCategoryMeta(selectedMarkerData.category);
+            return (
+              <>
+                <div className="flex items-start justify-between">
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border flex items-center gap-1 ${meta.badgeBg}`}>
+                    <span>{meta.symbol}</span>
+                    <span>{selectedMarkerData.severity} ({selectedMarkerData.priorityScore}/100)</span>
+                  </span>
+                  <button
+                    onClick={() => setSelectedMarkerData(null)}
+                    className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs font-bold transition-all"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-          <h4 className="mt-2.5 text-base font-extrabold text-slate-900 leading-tight">
-            {selectedMarkerData.roadName}
-          </h4>
-          <p className="text-xs text-slate-500 mt-0.5">{selectedMarkerData.landmark}</p>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <span className="text-2xl">{meta.symbol}</span>
+                  <div>
+                    <h4 className="text-base font-extrabold text-slate-900 leading-tight">
+                      {selectedMarkerData.roadName}
+                    </h4>
+                    <span className="text-[11px] font-bold text-blue-600">{meta.label}</span>
+                  </div>
+                </div>
 
-          <div className="grid grid-cols-2 gap-2 my-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
-            <div>
-              <div className="text-[10px] text-slate-500 font-medium">Aggregated Reports</div>
-              <div className="text-base font-extrabold text-blue-700">
-                {selectedMarkerData.complaintCount} Complaints
-              </div>
-            </div>
-            <div>
-              <div className="text-[10px] text-slate-500 font-medium">Affected Citizens</div>
-              <div className="text-base font-extrabold text-indigo-700">
-                {selectedMarkerData.affectedCitizens} Citizens
-              </div>
-            </div>
-          </div>
+                <p className="text-xs text-slate-500 mt-1">{selectedMarkerData.landmark}</p>
 
-          {/* Progress Bar */}
-          <div className="mb-4">
-            <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
-              <span>Work Progress</span>
-              <span className="text-blue-600">{selectedMarkerData.progress}%</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-blue-600 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
-                style={{ width: `${selectedMarkerData.progress}%` }}
-              />
-            </div>
-          </div>
+                <div className="grid grid-cols-2 gap-2 my-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
+                  <div>
+                    <div className="text-[10px] text-slate-500 font-medium">Aggregated Reports</div>
+                    <div className="text-base font-extrabold" style={{ color: meta.color }}>
+                      {selectedMarkerData.complaintCount} Complaints
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-slate-500 font-medium">Affected Citizens</div>
+                    <div className="text-base font-extrabold text-indigo-700">
+                      {selectedMarkerData.affectedCitizens} Citizens
+                    </div>
+                  </div>
+                </div>
 
-          <button
-            onClick={() => onSelectIssue && onSelectIssue(selectedMarkerData)}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all"
-          >
-            <Eye className="w-3.5 h-3.5" />
-            Inspect Master Hub (#{selectedMarkerData.id})
-          </button>
+                {/* Progress Bar */}
+                <div className="mb-4">
+                  <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
+                    <span>Resolution Progress</span>
+                    <span className="text-blue-600">{selectedMarkerData.progress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-600 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                      style={{ width: `${selectedMarkerData.progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onSelectIssue && onSelectIssue(selectedMarkerData)}
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all active:scale-98"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Inspect Hub Details (#{selectedMarkerData.id})
+                </button>
+              </>
+            );
+          })()}
         </div>
       )}
 
@@ -258,3 +400,4 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
     </div>
   );
 }
+
