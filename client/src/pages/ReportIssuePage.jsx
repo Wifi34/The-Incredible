@@ -188,6 +188,65 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
   const [gpsAccuracy, setGpsAccuracy] = useState(null);
 
+  // Helper to reverse geocode Lat/Lng into live street / landmark name
+  const getAddressFromCoords = async (latitude, longitude, closestWard) => {
+    let detectedRoad = '';
+
+    // 1. Try OpenStreetMap Nominatim
+    try {
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+        { headers: { 'Accept-Language': 'en' } }
+      );
+      if (geoRes.ok) {
+        const geoData = await geoRes.json();
+        const addr = geoData.address || {};
+        const primary = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || addr.building || addr.commercial || addr.residential || addr.hamlet || addr.village;
+        const secondary = addr.suburb || addr.city_district || addr.city || 'Nagpur';
+
+        if (primary && secondary && primary !== secondary) {
+          detectedRoad = `${primary}, ${secondary}`;
+        } else if (primary) {
+          detectedRoad = `${primary}, Nagpur`;
+        } else if (geoData.display_name) {
+          const parts = geoData.display_name.split(',').map(s => s.trim());
+          detectedRoad = parts.slice(0, 2).join(', ');
+        }
+      }
+    } catch (geoErr) {
+      console.warn('Nominatim reverse geocode notice:', geoErr.message);
+    }
+
+    // 2. Fallback to BigDataCloud Open Reverse Geocoding
+    if (!detectedRoad) {
+      try {
+        const bdcRes = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
+        );
+        if (bdcRes.ok) {
+          const bdcData = await bdcRes.json();
+          const locality = bdcData.locality || bdcData.city || 'Nagpur';
+          const localityInfo = bdcData.localityInfo?.informative || [];
+          const roadItem = localityInfo.find(item => item.order >= 4 && item.name);
+          if (roadItem?.name) {
+            detectedRoad = `${roadItem.name}, ${locality}`;
+          } else if (locality) {
+            detectedRoad = `${locality}, Nagpur`;
+          }
+        }
+      } catch (bdcErr) {
+        console.warn('BigDataCloud geocode notice:', bdcErr.message);
+      }
+    }
+
+    // 3. Guaranteed fallback to closest Ward default road
+    if (!detectedRoad || detectedRoad.includes('undefined')) {
+      detectedRoad = WARD_INFO[closestWard]?.defaultRoad || 'West High Court (WHC) Road, Dharampeth';
+    }
+
+    return detectedRoad;
+  };
+
   // Live GPS Auto-Detect Handler with Real Reverse Geocoding
   const detectGpsLocation = () => {
     if (!navigator.geolocation) {
@@ -202,27 +261,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         setGpsCoords({ lat: latitude, lng: longitude });
         setGpsLocked(true);
 
-        // 1. Live Reverse Geocoding via OpenStreetMap Nominatim (Free, No API key needed)
-        try {
-          const geoRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
-            { headers: { 'Accept-Language': 'en' } }
-          );
-          if (geoRes.ok) {
-            const geoData = await geoRes.json();
-            const addr = geoData.address || {};
-            const roadOrPlace = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || addr.building || addr.commercial;
-            const locality = addr.suburb || addr.city_district || addr.city || 'Nagpur';
-            
-            if (roadOrPlace) {
-              setRoadName(`${roadOrPlace}, ${locality}`);
-            }
-          }
-        } catch (geoErr) {
-          console.warn('Reverse geocoding network notice:', geoErr.message);
-        }
-
-        // 2. Map to nearest Nagpur Ward
+        // 1. Calculate closest Ward
         let closestWard = 'ward_12';
         let minDis = 9999999;
         for (const [wId, info] of Object.entries(WARD_INFO)) {
@@ -232,16 +271,22 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             closestWard = wId;
           }
         }
+
+        // 2. Set Ward & resolve live Road / Landmark name
         setWardId(closestWard);
+        const resolvedAddress = await getAddressFromCoords(latitude, longitude, closestWard);
+        setRoadName(resolvedAddress);
         setGpsDetecting(false);
-        showToast(`📍 Live GPS Locked! (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`, 'success');
+        showToast(`📍 Live GPS Locked: ${resolvedAddress}`, 'success');
       },
       (err) => {
         setGpsDetecting(false);
         console.warn('GPS error, using active Nagpur Ward coords:', err.message);
-        setGpsCoords(WARD_INFO[wardId]?.coords || { lat: 21.1425, lng: 79.0620 });
+        const fallbackWard = wardId || 'ward_12';
+        setGpsCoords(WARD_INFO[fallbackWard]?.coords || { lat: 21.1425, lng: 79.0620 });
+        setRoadName(WARD_INFO[fallbackWard]?.defaultRoad || 'West High Court (WHC) Road, Dharampeth');
         setGpsLocked(true);
-        showToast(`📍 Location synchronized to ${WARD_INFO[wardId]?.defaultRoad || 'Nagpur'}`, 'success');
+        showToast(`📍 Location synchronized to ${WARD_INFO[fallbackWard]?.defaultRoad || 'Nagpur'}`, 'success');
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
