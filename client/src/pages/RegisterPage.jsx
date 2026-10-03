@@ -11,7 +11,7 @@ export function RegisterPage({ setCurrentTab }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [address, setAddress] = useState('');
-  const [city, setCity] = useState('Pune');
+  const [city, setCity] = useState('Nagpur');
   const [wardId, setWardId] = useState('ward_12');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -138,10 +138,10 @@ export function RegisterPage({ setCurrentTab }) {
               onChange={(e) => setWardId(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all font-medium"
             >
-              <option value="ward_12">Ward 12 (Shivaji Nagar)</option>
-              <option value="ward_8">Ward 8 (Laxmi Road Market)</option>
-              <option value="ward_7">Ward 7 (Kalyani Nagar IT)</option>
-              <option value="ward_5">Ward 5 (Kasba Peth)</option>
+              <option value="ward_12">Ward 12 (Dharampeth & WHC Road)</option>
+              <option value="ward_8">Ward 8 (Sitabuldi & Central Hub)</option>
+              <option value="ward_7">Ward 7 (IT Park & Gayatri Nagar)</option>
+              <option value="ward_5">Ward 5 (Mahal & Gandhibagh)</option>
             </select>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function RegisterPage({ setCurrentTab }) {
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="e.g. Flat 402, Green Avenue, FC Road"
+            placeholder="e.g. Flat 402, Green Avenue, WHC Road, Dharampeth"
             className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
           />
         </div>

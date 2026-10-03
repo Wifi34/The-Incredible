@@ -95,7 +95,7 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       location: {
         lat,
         lng,
-        address: location?.address || `${cleanRoadName}, Pune`
+        address: location?.address || `${cleanRoadName}, Nagpur`
       },
       wardId: effectiveWardId,
       masterIssueId: masterIssue.id,

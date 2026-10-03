@@ -90,9 +90,9 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Centered on Pune Civic District
+      // Centered on Nagpur Civic District
       const map = L.map(mapContainerRef.current, {
-        center: [18.5284, 73.8567],
+        center: [21.1458, 79.0882],
         zoom: 13,
         zoomControl: false
       });
@@ -127,8 +127,8 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
     // Auto-Focus / FlyToBounds when category is selected
     if (filtered.length > 0) {
       const latLngs = filtered.map(item => [
-        item.location?.lat || 18.5314,
-        item.location?.lng || 73.8446
+        item.location?.lat || 21.1425,
+        item.location?.lng || 79.0620
       ]);
 
       if (filtered.length === 1) {
@@ -147,8 +147,8 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
 
     // Render Markers & Area Circles
     filtered.forEach(issue => {
-      const lat = issue.location?.lat || 18.5314;
-      const lng = issue.location?.lng || 73.8446;
+      const lat = issue.location?.lat || 21.1425;
+      const lng = issue.location?.lng || 79.0620;
       const meta = getCategoryMeta(issue.category);
 
       // 1. Area Hotspot / Incident Zone Circle
@@ -291,7 +291,7 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
         <button
           onClick={() => {
             if (mapInstanceRef.current) {
-              mapInstanceRef.current.flyTo([18.5284, 73.8567], 13, { duration: 1.0 });
+              mapInstanceRef.current.flyTo([21.1458, 79.0882], 13, { duration: 1.0 });
             }
           }}
           className="px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-50 text-xs font-bold shadow-md flex items-center gap-1.5 transition-all"

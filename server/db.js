@@ -56,10 +56,10 @@ class Database {
 
     // 3. Wards
     this.wards = [
-      { id: 'ward_12', name: 'Ward 12 - Shivaji Nagar & University Area', zone: 'Zone 1 - Central', lat: 18.5314, lng: 73.8446, totalPopulation: 145000 },
-      { id: 'ward_8', name: 'Ward 8 - Laxmi Road & Commercial Market', zone: 'Zone 2 - South', lat: 18.5167, lng: 73.8562, totalPopulation: 182000 },
-      { id: 'ward_7', name: 'Ward 7 - Kalyani Nagar & IT Corridor', zone: 'Zone 3 - East', lat: 18.5463, lng: 73.9033, totalPopulation: 160000 },
-      { id: 'ward_5', name: 'Ward 5 - Kasba Peth & Heritage Sector', zone: 'Zone 4 - North-West', lat: 18.5204, lng: 73.8567, totalPopulation: 120000 }
+      { id: 'ward_12', name: 'Ward 12 - Dharampeth & WHC Road Area', zone: 'Zone 1 - Dharampeth & West', lat: 21.1425, lng: 79.0620, totalPopulation: 165000 },
+      { id: 'ward_8', name: 'Ward 8 - Sitabuldi & Central Commercial Hub', zone: 'Zone 2 - Central & Sitabuldi', lat: 21.1460, lng: 79.0845, totalPopulation: 195000 },
+      { id: 'ward_7', name: 'Ward 7 - IT Park, Gayatri Nagar & South Corridor', zone: 'Zone 3 - South & IT Park', lat: 21.1235, lng: 79.0520, totalPopulation: 172000 },
+      { id: 'ward_5', name: 'Ward 5 - Mahal, Gandhibagh & Heritage Sector', zone: 'Zone 4 - East & Heritage', lat: 21.1520, lng: 79.1120, totalPopulation: 138000 }
     ];
 
     // 4. Field Teams
@@ -154,8 +154,8 @@ class Database {
         passwordHash: citizenPassword,
         phone: '+91 98765 43210',
         role: 'CITIZEN',
-        address: 'Flat 402, Green Avenue, FC Road',
-        city: 'Pune',
+        address: 'Flat 402, Green Avenue, WHC Road, Dharampeth',
+        city: 'Nagpur',
         wardId: 'ward_12',
         coins: 250,
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
@@ -168,8 +168,8 @@ class Database {
         passwordHash: citizenPassword,
         phone: '+91 98765 43211',
         role: 'CITIZEN',
-        address: 'B-12 Shanti Heights, Ward 12 Main Road',
-        city: 'Pune',
+        address: 'B-12 Shanti Heights, Dharampeth Main Road',
+        city: 'Nagpur',
         wardId: 'ward_12',
         coins: 180,
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
@@ -182,8 +182,8 @@ class Database {
         passwordHash: citizenPassword,
         phone: '+91 98765 43212',
         role: 'CITIZEN',
-        address: '74 Market Yard, Laxmi Road',
-        city: 'Pune',
+        address: '74 Cotton Market, Sitabuldi',
+        city: 'Nagpur',
         wardId: 'ward_8',
         coins: 120,
         avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
@@ -196,11 +196,11 @@ class Database {
         passwordHash: authorityPassword,
         phone: '+91 98220 99881',
         role: 'AUTHORITY',
-        address: 'PMC Road Division Office, Ward 12',
-        city: 'Pune',
+        address: 'NMC Road Division Office, Dharampeth',
+        city: 'Nagpur',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
-        designation: 'Superintending Road Infrastructure Engineer',
+        designation: 'Superintending Road Infrastructure Engineer (NMC)',
         badgeNumber: 'AUTH-RD-1204',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-08-01T08:00:00.000Z'
@@ -212,11 +212,11 @@ class Database {
         passwordHash: authorityPassword,
         phone: '+91 98220 99882',
         role: 'AUTHORITY',
-        address: 'Zonal Sanitation Control, Ward 8',
-        city: 'Pune',
+        address: 'NMC Zonal Sanitation Control, Sitabuldi',
+        city: 'Nagpur',
         wardId: 'ward_8',
         departmentId: 'dept_sanitation',
-        designation: 'Chief Sanitation & Public Health Officer',
+        designation: 'Chief Sanitation & Public Health Officer (NMC)',
         badgeNumber: 'AUTH-SN-0819',
         avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-08-01T08:00:00.000Z'
@@ -228,11 +228,11 @@ class Database {
         passwordHash: authorityPassword,
         phone: '+91 98220 99883',
         role: 'AUTHORITY',
-        address: 'Public Works Electrical Division, Ward 7',
-        city: 'Pune',
+        address: 'NMC Public Works Electrical Division, IT Park',
+        city: 'Nagpur',
         wardId: 'ward_7',
         departmentId: 'dept_electrical',
-        designation: 'Senior Electrical Infrastructure Superintendent',
+        designation: 'Senior Electrical Infrastructure Superintendent (NMC)',
         badgeNumber: 'AUTH-EL-0702',
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-08-01T08:00:00.000Z'
@@ -244,11 +244,11 @@ class Database {
         passwordHash: adminPassword,
         phone: '+91 98110 00001',
         role: 'ADMIN',
-        address: 'Municipal Corporation Headquarters, Civic Command Center',
-        city: 'Pune',
+        address: 'Nagpur Municipal Corporation Headquarters, Civil Lines',
+        city: 'Nagpur',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
-        designation: 'Municipal Commissioner & CivicLens Director',
+        designation: 'Municipal Commissioner & CivicLens Director (NMC)',
         badgeNumber: 'ADMIN-HQ-001',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-07-01T08:00:00.000Z'
@@ -260,16 +260,16 @@ class Database {
       {
         id: 'R1028',
         masterCode: 'MASTER ISSUE #R1028',
-        roadName: 'Ward 12 Main Road',
-        landmark: 'Near Model Colony Junction to University Gate',
+        roadName: 'West High Court (WHC) Road',
+        landmark: 'Near Law College Square to Shankar Nagar Junction',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
         category: 'Pothole',
         categoriesSummary: ['Pothole (18)', 'Road Damage (5)', 'Broken Streetlight (5)'],
         location: {
-          lat: 18.5314,
-          lng: 73.8446,
-          address: 'Ward 12 Main Road, Shivaji Nagar, Pune, Maharashtra 411005'
+          lat: 21.1425,
+          lng: 79.0620,
+          address: 'WHC Road, Dharampeth, Nagpur, Maharashtra 440010'
         },
         complaintIds: [
           'C1001', 'C1002', 'C1003', 'C1004', 'C1005', 'C1006', 'C1007', 'C1008',
@@ -302,16 +302,16 @@ class Database {
       {
         id: 'R1029',
         masterCode: 'MASTER ISSUE #R1029',
-        roadName: 'Laxmi Market Road',
-        landmark: 'Opposite City Flower Bazaar',
+        roadName: 'Sitabuldi Main Market Road',
+        landmark: 'Opposite Variety Square & Cotton Market Corridor',
         wardId: 'ward_8',
         departmentId: 'dept_sanitation',
         category: 'Garbage',
         categoriesSummary: ['Garbage (7)', 'Illegal Dumping (2)'],
         location: {
-          lat: 18.5167,
-          lng: 73.8562,
-          address: 'Laxmi Road, Market Yard, Pune, Maharashtra 411002'
+          lat: 21.1460,
+          lng: 79.0845,
+          address: 'Sitabuldi Market Road, Nagpur, Maharashtra 440012'
         },
         complaintIds: ['C1021', 'C1022', 'C1023', 'C1024', 'C1025'],
         complaintCount: 9,
@@ -339,16 +339,16 @@ class Database {
       {
         id: 'R1030',
         masterCode: 'MASTER ISSUE #R1030',
-        roadName: 'Tech Park IT Link Road',
-        landmark: 'Near Cyber Tower Curve',
+        roadName: 'IT Park Ring Road Corridor',
+        landmark: 'Near VNIT Gate & Gayatri Nagar Telecom Tower',
         wardId: 'ward_7',
         departmentId: 'dept_electrical',
         category: 'Broken Streetlight',
         categoriesSummary: ['Broken Streetlight (7)'],
         location: {
-          lat: 18.5463,
-          lng: 73.9033,
-          address: 'Kalyani Nagar IT Link, Pune 411014'
+          lat: 21.1235,
+          lng: 79.0520,
+          address: 'IT Park Link Road, Gayatri Nagar, Nagpur 440022'
         },
         complaintIds: ['C1026', 'C1027', 'C1028'],
         complaintCount: 7,
@@ -376,16 +376,16 @@ class Database {
       {
         id: 'R1031',
         masterCode: 'MASTER ISSUE #R1031',
-        roadName: 'Old Town Heritage Road',
-        landmark: 'Kasba Ganpati Chowk',
+        roadName: 'Mahal Heritage Commercial Road',
+        landmark: 'Near Badkas Chowk & Gandhibagh Gate',
         wardId: 'ward_5',
         departmentId: 'dept_water',
         category: 'Open Drain',
         categoriesSummary: ['Open Drain (10)', 'Water Leakage (4)'],
         location: {
-          lat: 18.5204,
-          lng: 73.8567,
-          address: 'Kasba Peth Main Road, Pune 411011'
+          lat: 21.1520,
+          lng: 79.1120,
+          address: 'Mahal Main Road, Nagpur 440032'
         },
         complaintIds: ['C1029', 'C1030'],
         complaintCount: 14,
@@ -414,16 +414,16 @@ class Database {
       {
         id: 'R1032',
         masterCode: 'MASTER ISSUE #R1032',
-        roadName: 'Fergusson College (FC) Road',
-        landmark: 'Opposite Vaishali Restaurant & Goodluck Chowk',
+        roadName: 'Shankar Nagar & Law College Road',
+        landmark: 'Opposite Coffee House & Bajaj Nagar Chowk',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
         category: 'Pothole',
         categoriesSummary: ['Pothole (12)', 'Cracked Asphalt (4)'],
         location: {
-          lat: 18.5246,
-          lng: 73.8415,
-          address: 'FC Road, Shivaji Nagar, Pune, Maharashtra 411004'
+          lat: 21.1380,
+          lng: 79.0650,
+          address: 'Shankar Nagar Road, Dharampeth, Nagpur 440010'
         },
         complaintIds: ['C1031', 'C1032', 'C1033'],
         complaintCount: 16,
@@ -452,23 +452,23 @@ class Database {
       {
         id: 'R1033',
         masterCode: 'MASTER ISSUE #R1033',
-        roadName: 'Kothrud Paud Road Corridor',
-        landmark: 'Near Kinara Hotel Flyover Junction',
+        roadName: 'Amravati Road Corridor',
+        landmark: 'Near Ravi Nagar Square & University Campus',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
         category: 'Pothole',
         categoriesSummary: ['Pothole (8)', 'Loose Gravel (3)'],
         location: {
-          lat: 18.5074,
-          lng: 73.8077,
-          address: 'Paud Road, Kothrud, Pune, Maharashtra 411038'
+          lat: 21.1540,
+          lng: 79.0480,
+          address: 'Amravati Road, Ravi Nagar, Nagpur 440033'
         },
         complaintIds: ['C1034', 'C1035'],
         complaintCount: 11,
         affectedCitizens: 10,
         severity: 'MEDIUM',
         priorityScore: 58,
-        roadImportance: 'Western Pune Arterial Link',
+        roadImportance: 'Western Nagpur Arterial Highway Link',
         safetyImpact: 'Vehicle suspension damages and traffic slowdowns',
         assignedAuthorityId: 'usr_authority_1',
         assignedTeamId: null,
@@ -489,23 +489,23 @@ class Database {
       {
         id: 'R1034',
         masterCode: 'MASTER ISSUE #R1034',
-        roadName: 'Swargate Bus Station Perimeter',
-        landmark: 'Jedhe Chowk Underpass Entry',
+        roadName: 'Variety Square & Railway Station Corridor',
+        landmark: 'Near Sitabuldi Interchange Underpass',
         wardId: 'ward_8',
         departmentId: 'dept_sanitation',
         category: 'Garbage',
         categoriesSummary: ['Garbage (15)', 'Overflowing Bins (6)'],
         location: {
-          lat: 18.5018,
-          lng: 73.8587,
-          address: 'Jedhe Chowk, Swargate, Pune, Maharashtra 411042'
+          lat: 21.1470,
+          lng: 79.0820,
+          address: 'Variety Square, Sitabuldi, Nagpur 440012'
         },
         complaintIds: ['C1036', 'C1037', 'C1038'],
         complaintCount: 21,
         affectedCitizens: 21,
         severity: 'CRITICAL',
         priorityScore: 96,
-        roadImportance: 'Major State Transit Terminal',
+        roadImportance: 'Central Nagpur Transit Terminal',
         safetyImpact: 'Severe foul odor, stray animal hazard, pest breeding',
         assignedAuthorityId: 'usr_authority_2',
         assignedTeamId: 'team_san_1',
@@ -527,16 +527,16 @@ class Database {
       {
         id: 'R1035',
         masterCode: 'MASTER ISSUE #R1035',
-        roadName: 'Hadapsar Gadital Vegetable Market',
-        landmark: 'Opposite Solapur Road Overbridge',
+        roadName: 'Cotton Market Agro-Vegetable Bazaar',
+        landmark: 'Opposite Great Nag Road Overbridge',
         wardId: 'ward_8',
         departmentId: 'dept_sanitation',
         category: 'Garbage',
         categoriesSummary: ['Garbage (10)', 'Rotting Agro-Waste (8)'],
         location: {
-          lat: 18.5089,
-          lng: 73.9260,
-          address: 'Gadital Market, Hadapsar, Pune, Maharashtra 411028'
+          lat: 21.1410,
+          lng: 79.0940,
+          address: 'Cotton Market, Nagpur, Maharashtra 440018'
         },
         complaintIds: ['C1039', 'C1040'],
         complaintCount: 18,
@@ -565,16 +565,16 @@ class Database {
       {
         id: 'R1036',
         masterCode: 'MASTER ISSUE #R1036',
-        roadName: 'Viman Nagar Central Avenue',
-        landmark: 'Near Phoenix Market City Outer Ring',
+        roadName: 'Wardha Road Airport Corridor',
+        landmark: 'Near Chhatrapati Square & Metro Pillar 42',
         wardId: 'ward_7',
         departmentId: 'dept_electrical',
         category: 'Broken Streetlight',
         categoriesSummary: ['Broken Streetlight (9)', 'Pole Damage (2)'],
         location: {
-          lat: 18.5679,
-          lng: 73.9143,
-          address: 'Viman Nagar Main Road, Pune, Maharashtra 411014'
+          lat: 21.1080,
+          lng: 79.0620,
+          address: 'Wardha Road, Nagpur, Maharashtra 440015'
         },
         complaintIds: ['C1041', 'C1042'],
         complaintCount: 11,
@@ -603,23 +603,23 @@ class Database {
       {
         id: 'R1037',
         masterCode: 'MASTER ISSUE #R1037',
-        roadName: 'Baner High Street Corridor',
-        landmark: 'Near Balewadi Phata Traffic Signal',
+        roadName: 'Hingna MIDC Electronic Zone Strip',
+        landmark: 'Near Subhash Nagar Metro Link',
         wardId: 'ward_7',
         departmentId: 'dept_electrical',
         category: 'Broken Streetlight',
         categoriesSummary: ['Broken Streetlight (5)', 'Flashing Luminaire (3)'],
         location: {
-          lat: 18.5590,
-          lng: 73.7868,
-          address: 'Baner High Street, Baner, Pune, Maharashtra 411045'
+          lat: 21.1260,
+          lng: 79.0320,
+          address: 'Hingna Road, Nagpur, Maharashtra 440016'
         },
         complaintIds: ['C1043', 'C1044'],
         complaintCount: 8,
         affectedCitizens: 8,
         severity: 'MEDIUM',
         priorityScore: 62,
-        roadImportance: 'Tech Corridor Commercial Strip',
+        roadImportance: 'Industrial Corridor Commercial Strip',
         safetyImpact: 'Reduced visibility for pedestrians and two-wheelers',
         assignedAuthorityId: 'usr_authority_3',
         assignedTeamId: null,
@@ -640,23 +640,23 @@ class Database {
       {
         id: 'R1038',
         masterCode: 'MASTER ISSUE #R1038',
-        roadName: 'Senapati Bapat Road Storm Drain',
-        landmark: 'Near Symbiosis Campus & Chatushrungi Hill Foot',
+        roadName: 'Civil Lines Palm Road Storm Drain',
+        landmark: 'Near High Court & Commissionerate Office',
         wardId: 'ward_5',
         departmentId: 'dept_water',
         category: 'Open Drain',
         categoriesSummary: ['Open Drain (8)', 'Waterlogging (6)'],
         location: {
-          lat: 18.5355,
-          lng: 73.8291,
-          address: 'Senapati Bapat Road, Pune, Maharashtra 411016'
+          lat: 21.1560,
+          lng: 79.0720,
+          address: 'Palm Road, Civil Lines, Nagpur 440001'
         },
         complaintIds: ['C1045', 'C1046'],
         complaintCount: 14,
         affectedCitizens: 12,
         severity: 'CRITICAL',
         priorityScore: 92,
-        roadImportance: 'Major University & IT Hub Arterial',
+        roadImportance: 'Administrative District Arterial',
         safetyImpact: 'Severe rainwater backflow, submerged road curbs',
         assignedAuthorityId: null,
         assignedTeamId: null,
@@ -678,23 +678,23 @@ class Database {
       {
         id: 'R1039',
         masterCode: 'MASTER ISSUE #R1039',
-        roadName: 'Katraj Spillway Channel Road',
-        landmark: 'Near Rajiv Gandhi Zoological Park Entry',
+        roadName: 'Koradi Mankapur Outer Ring Road',
+        landmark: 'Near Mankapur Sports Complex Junction',
         wardId: 'ward_5',
         departmentId: 'dept_water',
         category: 'Water Leakage',
         categoriesSummary: ['Water Leakage (11)', 'Burst Pipeline (4)'],
         location: {
-          lat: 18.4575,
-          lng: 73.8588,
-          address: 'Katraj-Kondhwa Road, Pune, Maharashtra 411046'
+          lat: 21.1850,
+          lng: 79.0820,
+          address: 'Koradi Road, Mankapur, Nagpur 440030'
         },
         complaintIds: ['C1047', 'C1048'],
         complaintCount: 15,
         affectedCitizens: 14,
         severity: 'HIGH',
         priorityScore: 85,
-        roadImportance: 'Southern Pune Outer Bypass',
+        roadImportance: 'Northern Nagpur Outer Bypass',
         safetyImpact: 'Continuous potable water loss, road foundation weakening',
         assignedAuthorityId: null,
         assignedTeamId: null,
@@ -723,13 +723,13 @@ class Database {
         citizenEmail: 'citizen@civicsense.gov',
         citizenPhone: '+91 98765 43210',
         category: 'Pothole',
-        roadName: 'Ward 12 Main Road',
-        description: 'Huge pothole right in front of Model Colony bus stop. Two bikes almost slipped this morning.',
+        roadName: 'West High Court (WHC) Road',
+        description: 'Huge pothole right in front of Law College Square bus stop. Two bikes almost slipped this morning.',
         images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5314,
-          lng: 73.8446,
-          address: 'Ward 12 Main Road, Model Colony, Pune'
+          lat: 21.1425,
+          lng: 79.0620,
+          address: 'WHC Road, Law College Square, Dharampeth, Nagpur'
         },
         wardId: 'ward_12',
         masterIssueId: 'R1028',
@@ -757,13 +757,13 @@ class Database {
         citizenEmail: 'citizen@civicsense.gov',
         citizenPhone: '+91 98765 43210',
         category: 'Broken Streetlight',
-        roadName: 'Tech Park IT Link Road',
-        description: '3 consecutive street lights are completely dark from Cyber Tower curve to metro station.',
+        roadName: 'IT Park Ring Road Corridor',
+        description: '3 consecutive street lights are completely dark from Gayatri Nagar curve to VNIT gate.',
         images: ['https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5463,
-          lng: 73.9033,
-          address: 'Kalyani Nagar IT Link, Pune 411014'
+          lat: 21.1235,
+          lng: 79.0520,
+          address: 'IT Park Link Road, Gayatri Nagar, Nagpur 440022'
         },
         wardId: 'ward_7',
         masterIssueId: 'R1030',
@@ -789,13 +789,13 @@ class Database {
         citizenEmail: 'citizen@civicsense.gov',
         citizenPhone: '+91 98765 43210',
         category: 'Garbage',
-        roadName: 'Laxmi Market Road',
-        description: 'Overflowing commercial waste bins near flower market blocking entire footpath.',
+        roadName: 'Sitabuldi Main Market Road',
+        description: 'Overflowing commercial waste bins near Variety Square blocking entire footpath.',
         images: ['https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5167,
-          lng: 73.8562,
-          address: 'Laxmi Road, Market Yard, Pune, Maharashtra 411002'
+          lat: 21.1460,
+          lng: 79.0845,
+          address: 'Sitabuldi Market Road, Nagpur, Maharashtra 440012'
         },
         wardId: 'ward_8',
         masterIssueId: 'R1029',
@@ -821,13 +821,13 @@ class Database {
         citizenEmail: 'citizen@civicsense.gov',
         citizenPhone: '+91 98765 43210',
         category: 'Open Drain',
-        roadName: 'Old Town Heritage Road',
-        description: 'Hazardous broken drain slab and foul sewage overflow near Kasba Ganpati chowk.',
+        roadName: 'Mahal Heritage Commercial Road',
+        description: 'Hazardous broken drain slab and foul sewage overflow near Badkas Chowk.',
         images: ['https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5204,
-          lng: 73.8567,
-          address: 'Kasba Peth Main Road, Pune 411011'
+          lat: 21.1520,
+          lng: 79.1120,
+          address: 'Mahal Main Road, Nagpur 440032'
         },
         wardId: 'ward_5',
         masterIssueId: 'R1031',
@@ -853,13 +853,13 @@ class Database {
         citizenEmail: 'citizen@civicsense.gov',
         citizenPhone: '+91 98765 43210',
         category: 'Pothole',
-        roadName: 'Fergusson College (FC) Road',
-        description: 'Deep road depression near Goodluck Chowk successfully resurfaced and verified.',
+        roadName: 'Shankar Nagar & Law College Road',
+        description: 'Deep road depression near Shankar Nagar Chowk successfully resurfaced and verified.',
         images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5246,
-          lng: 73.8415,
-          address: 'FC Road, Shivaji Nagar, Pune 411004'
+          lat: 21.1380,
+          lng: 79.0650,
+          address: 'Shankar Nagar Road, Dharampeth, Nagpur 440010'
         },
         wardId: 'ward_12',
         masterIssueId: 'R1032',
@@ -889,13 +889,13 @@ class Database {
         citizenEmail: `citizen${i}@civicsense.gov`,
         citizenPhone: `+91 98765 432${i < 10 ? '0' + i : i}`,
         category: i % 4 === 0 ? 'Road Damage' : (i % 5 === 0 ? 'Broken Streetlight' : 'Pothole'),
-        roadName: 'Ward 12 Main Road',
-        description: `Correlated report #${i}: Pothole and road crack near pole #${10 + i} on Ward 12 Main Road.`,
+        roadName: 'West High Court (WHC) Road',
+        description: `Correlated report #${i}: Pothole and road crack near pole #${10 + i} on WHC Road, Dharampeth.`,
         images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5314 + (Math.random() - 0.5) * 0.004,
-          lng: 73.8446 + (Math.random() - 0.5) * 0.004,
-          address: `Ward 12 Main Road, Pole #${10 + i}, Pune`
+          lat: 21.1425 + (Math.random() - 0.5) * 0.004,
+          lng: 79.0620 + (Math.random() - 0.5) * 0.004,
+          address: `WHC Road, Pole #${10 + i}, Dharampeth, Nagpur`
         },
         wardId: 'ward_12',
         masterIssueId: 'R1028',
@@ -1122,9 +1122,9 @@ class Database {
         citizenId: 'usr_citizen_2',
         citizenName: 'Priya Patil',
         rating: 5,
-        comment: 'Problem was fixed properly and road is completely smooth now. Thank you PMC & CivicLens!',
+        comment: 'Problem was fixed properly and road is completely smooth now. Thank you NMC & CivicLens!',
         category: 'Pothole',
-        roadName: 'University Road',
+        roadName: 'WHC Road, Dharampeth',
         createdAt: '2026-09-28T14:30:00.000Z'
       }
     ];

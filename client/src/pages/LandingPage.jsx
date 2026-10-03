@@ -247,7 +247,7 @@ export function LandingPage({ setCurrentTab, onOpenDemo }) {
               <span>EMERGING CIVIC HOTSPOT DETECTED</span>
             </div>
             <h3 className="text-xl font-bold text-slate-900">
-              Ward 12 Main Road — Pothole Reports Surged +59% This Month
+              WHC Road, Dharampeth — Pothole Reports Surged +59% This Month
             </h3>
             <p className="text-xs text-slate-600">
               43 complaints registered vs 27 last month. AI Spatial Cluster automatically elevated Road Priority to 98/100 (CRITICAL) and dispatched Road Maintenance Team #3.
@@ -261,7 +261,7 @@ export function LandingPage({ setCurrentTab, onOpenDemo }) {
             }}
             className="px-5 py-3 rounded-2xl text-xs font-extrabold bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 transition-all whitespace-nowrap"
           >
-            Inspect Ward 12 Cluster →
+            Inspect Dharampeth Cluster →
           </button>
         </div>
       </section>

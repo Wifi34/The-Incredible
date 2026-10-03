@@ -87,7 +87,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
   // Multilingual quick sample prompts
   const SAMPLE_PROMPTS = [
-    { lang: 'English', text: 'Deep hazardous pothole on main transit curve near Model Colony junction.' },
+    { lang: 'English', text: 'Deep hazardous pothole on main transit curve near Law College Square, Dharampeth.' },
     { lang: 'Hindi (हिंदी)', text: 'Road pe bada gaddha hai aur raat ko street light bhi nahi chalti.' },
     { lang: 'Marathi (मराठी)', text: 'इथे रस्त्यावर मोठा खड्डा पडला आहे आणि पाण्याचा निचरा होत नाही.' }
   ];
@@ -273,9 +273,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           anonymous,
           images: [imageUrl],
           location: {
-            lat: 18.5314 + (Math.random() - 0.5) * 0.003,
-            lng: 73.8446 + (Math.random() - 0.5) * 0.003,
-            address: `${roadName}, Pune`
+            lat: 21.1425 + (Math.random() - 0.5) * 0.003,
+            lng: 79.0620 + (Math.random() - 0.5) * 0.003,
+            address: `${roadName}, Nagpur`
           }
         })
       });
@@ -658,10 +658,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                 onChange={(e) => setWardId(e.target.value)}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
               >
-                <option value="ward_12">Ward 12 - Shivaji Nagar & University Area</option>
-                <option value="ward_8">Ward 8 - Laxmi Road & Commercial Market</option>
-                <option value="ward_7">Ward 7 - Kalyani Nagar & IT Corridor</option>
-                <option value="ward_5">Ward 5 - Kasba Peth & Heritage Sector</option>
+                <option value="ward_12">Ward 12 - Dharampeth & WHC Road Area</option>
+                <option value="ward_8">Ward 8 - Sitabuldi & Central Commercial Hub</option>
+                <option value="ward_7">Ward 7 - IT Park, Gayatri Nagar & South Corridor</option>
+                <option value="ward_5">Ward 5 - Mahal, Gandhibagh & Heritage Sector</option>
               </select>
             </div>
           </div>

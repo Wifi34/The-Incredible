@@ -248,7 +248,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 />
                 <div className="text-left hidden lg:block">
                   <div className="text-xs font-bold text-slate-800 leading-tight">{user.name}</div>
-                  <div className="text-[10px] text-slate-500">{user.city || 'Pune'}</div>
+                  <div className="text-[10px] text-slate-500">{user.city || 'Nagpur'}</div>
                 </div>
                 <button
                   onClick={() => {

@@ -540,12 +540,12 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🚇</span>
                   <div>
-                    <div className="text-xs font-bold text-slate-900">Pune Metro Daily Pass</div>
-                    <div className="text-[11px] text-slate-500">Free 1-Day unlimited metro rides • Worth ₹3.75 (150 🪙)</div>
+                    <div className="text-xs font-bold text-slate-900">Nagpur (Maha) Metro Pass</div>
+                    <div className="text-[11px] text-slate-500">Free 1-Day unlimited Nagpur Metro rides • Worth ₹3.75 (150 🪙)</div>
                   </div>
                 </div>
                 <button
-                  onClick={() => showToast('🎉 Pune Metro Pass voucher code sent to your registered email!', 'success')}
+                  onClick={() => showToast('🎉 Nagpur Metro Pass voucher code sent to your registered email!', 'success')}
                   disabled={(user?.coins || 0) < 150}
                   className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all text-right"
                 >
@@ -559,7 +559,7 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">🏛️</span>
                   <div>
-                    <div className="text-xs font-bold text-slate-900">PMC Property Tax Rebate</div>
+                    <div className="text-xs font-bold text-slate-900">NMC Property Tax Rebate</div>
                     <div className="text-[11px] text-slate-500">₹250 rebate on annual assessment • 300 🪙</div>
                   </div>
                 </div>

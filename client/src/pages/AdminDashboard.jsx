@@ -138,7 +138,7 @@ export function AdminDashboard({ setCurrentTab }) {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-mono text-purple-700 font-bold uppercase tracking-wider bg-purple-50 px-2.5 py-0.5 rounded-lg border border-purple-200">
-              Chief Municipal Administrator Command • Pune HQ
+              Chief Municipal Administrator Command • Nagpur HQ (NMC)
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">

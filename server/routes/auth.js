@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
       passwordHash,
       role: 'CITIZEN',
       address: address ? address.trim() : '',
-      city: city || 'Pune',
+      city: city || 'Nagpur',
       wardId: wardId || 'ward_12',
       coins: 50,
       avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'

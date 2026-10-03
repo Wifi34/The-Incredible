@@ -266,7 +266,7 @@ router.post('/create-user', async (req, res) => {
       departmentId: departmentId || 'dept_roads',
       designation: designation || 'Civic Infrastructure Officer',
       badgeNumber: badgeNumber || `AUTH-${Math.floor(1000 + Math.random() * 9000)}`,
-      city: 'Pune'
+      city: 'Nagpur'
     });
 
     // Audit Log

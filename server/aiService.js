@@ -147,7 +147,7 @@ export async function classifyIssueWithGemini(text = '', imageUrl = '', userCate
   }
 
   try {
-    const prompt = `You are the CivicLens Municipal AI Intelligence Engine for Pune Municipal Corporation.
+    const prompt = `You are the CivicLens Municipal AI Intelligence Engine for Nagpur Municipal Corporation (NMC).
 Analyze this civic issue report submitted by a citizen in English, Hindi, Marathi, or Hinglish:
 Description: "${text}"
 ${userCategory ? `User selected category: "${userCategory}"` : ''}
@@ -332,7 +332,7 @@ export function findOrCreateMasterIssue(db, { lat, lng, roadName, wardId, catego
     });
 
     const newMaster = db.addMasterIssue({
-      roadName: roadName || 'Pune City Road',
+      roadName: roadName || 'Nagpur City Road',
       landmark: `Near ${roadName || 'City Sector'}`,
       wardId: wardId || 'ward_12',
       departmentId: category === 'Garbage' ? 'dept_sanitation' : category === 'Broken Streetlight' ? 'dept_electrical' : category === 'Water Leakage' || category === 'Open Drain' ? 'dept_water' : 'dept_roads',
@@ -341,7 +341,7 @@ export function findOrCreateMasterIssue(db, { lat, lng, roadName, wardId, catego
       location: {
         lat,
         lng,
-        address: `${roadName || 'Pune Road'}, Ward ${wardId || '12'}, Pune`
+        address: `${roadName || 'Nagpur Road'}, Ward ${wardId || '12'}, Nagpur`
       },
       complaintIds: [complaintId],
       complaintCount: 1,
