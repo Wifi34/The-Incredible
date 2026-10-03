@@ -35,11 +35,16 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      // Dark styled tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 19
+      // Clean Watermark-Free Dark Canvas Tiles (No API key required)
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri, OpenStreetMap contributors',
+        maxZoom: 18
+      }).addTo(map);
+
+      // Clean Roads & Street Labels Overlay
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        opacity: 0.85
       }).addTo(map);
 
       markersLayerRef.current = L.layerGroup().addTo(map);
