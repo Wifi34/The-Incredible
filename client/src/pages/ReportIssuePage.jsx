@@ -186,7 +186,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     }
   };
 
-  // Live GPS Auto-Detect Handler
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
+
+  // Live GPS Auto-Detect Handler with Real Reverse Geocoding
   const detectGpsLocation = () => {
     if (!navigator.geolocation) {
       showToast('Geolocation is not supported by your browser', 'error');
@@ -194,9 +196,33 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     }
     setGpsDetecting(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGpsDetecting(false);
-        const { latitude, longitude } = pos.coords;
+      async (pos) => {
+        const { latitude, longitude, accuracy } = pos.coords;
+        setGpsAccuracy(Math.round(accuracy || 10));
+        setGpsCoords({ lat: latitude, lng: longitude });
+        setGpsLocked(true);
+
+        // 1. Live Reverse Geocoding via OpenStreetMap Nominatim (Free, No API key needed)
+        try {
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          );
+          if (geoRes.ok) {
+            const geoData = await geoRes.json();
+            const addr = geoData.address || {};
+            const roadOrPlace = addr.road || addr.suburb || addr.neighbourhood || addr.amenity || addr.building || addr.commercial;
+            const locality = addr.suburb || addr.city_district || addr.city || 'Nagpur';
+            
+            if (roadOrPlace) {
+              setRoadName(`${roadOrPlace}, ${locality}`);
+            }
+          }
+        } catch (geoErr) {
+          console.warn('Reverse geocoding network notice:', geoErr.message);
+        }
+
+        // 2. Map to nearest Nagpur Ward
         let closestWard = 'ward_12';
         let minDis = 9999999;
         for (const [wId, info] of Object.entries(WARD_INFO)) {
@@ -207,10 +233,8 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           }
         }
         setWardId(closestWard);
-        setRoadName(WARD_INFO[closestWard].defaultRoad);
-        setGpsCoords({ lat: latitude, lng: longitude });
-        setGpsLocked(true);
-        showToast(`📍 Live GPS Locked to ${WARD_INFO[closestWard].name}!`, 'success');
+        setGpsDetecting(false);
+        showToast(`📍 Live GPS Locked! (${latitude.toFixed(4)}° N, ${longitude.toFixed(4)}° E)`, 'success');
       },
       (err) => {
         setGpsDetecting(false);
@@ -219,7 +243,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         setGpsLocked(true);
         showToast(`📍 Location synchronized to ${WARD_INFO[wardId]?.defaultRoad || 'Nagpur'}`, 'success');
       },
-      { timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -902,11 +926,19 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
           {/* Live GPS Coordinates & Clustering Indicator */}
           <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Target Coordinates: <strong>{gpsCoords.lat.toFixed(4)}° N, {gpsCoords.lng.toFixed(4)}° E (Nagpur)</strong></span>
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Target GPS: <strong>{gpsCoords.lat.toFixed(5)}° N, {gpsCoords.lng.toFixed(5)}° E</strong></span>
+              {gpsAccuracy && (
+                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                  ±{gpsAccuracy}m accuracy
+                </span>
+              )}
             </div>
-            <span className="text-indigo-600 font-semibold">50m Spatial Clustering Active</span>
+            <div className="flex items-center gap-1.5 text-indigo-700 font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Real-time Geocoded (Nagpur)</span>
+            </div>
           </div>
 
           {/* Smart Duplicate Correlated Alert */}

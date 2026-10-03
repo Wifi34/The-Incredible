@@ -290,6 +290,51 @@ export function InteractiveMap({ masterIssues = [], onSelectIssue, selectedCateg
       <div className="absolute top-4 right-4 z-[999] hidden sm:flex items-center gap-2">
         <button
           onClick={() => {
+            if (!navigator.geolocation) {
+              alert('Geolocation is not supported by your browser.');
+              return;
+            }
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords;
+                if (mapInstanceRef.current) {
+                  mapInstanceRef.current.flyTo([latitude, longitude], 16, { duration: 1.2 });
+                  
+                  // Pulse user marker
+                  const userIcon = L.divIcon({
+                    html: `
+                      <div class="relative flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full bg-blue-500/30 animate-ping absolute"></div>
+                        <div class="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-lg"></div>
+                      </div>
+                    `,
+                    className: 'user-live-pin',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                  });
+                  L.marker([latitude, longitude], { icon: userIcon })
+                    .addTo(mapInstanceRef.current)
+                    .bindPopup('<b>📍 Your Live Location</b><br>Accurate to GPS position')
+                    .openPopup();
+                }
+              },
+              (err) => {
+                console.warn('Geolocation error:', err.message);
+                if (mapInstanceRef.current) {
+                  mapInstanceRef.current.flyTo([21.1458, 79.0882], 15, { duration: 1.0 });
+                }
+              },
+              { enableHighAccuracy: true }
+            );
+          }}
+          className="px-3 py-1.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 text-xs font-bold shadow-md flex items-center gap-1.5 transition-all"
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          <span>My Live Location</span>
+        </button>
+
+        <button
+          onClick={() => {
             if (mapInstanceRef.current) {
               mapInstanceRef.current.flyTo([21.1458, 79.0882], 13, { duration: 1.0 });
             }
