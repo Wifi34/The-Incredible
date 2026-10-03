@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import complaintRoutes from './routes/complaints.js';
 import authorityRoutes from './routes/authority.js';
@@ -8,6 +10,10 @@ import adminRoutes from './routes/admin.js';
 import demoRoutes from './routes/demo.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const clientDistPath = path.join(__dirname, '../client/dist');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -44,9 +50,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Global 404 Handler
+// Serve client static build files in production
+app.use(express.static(clientDistPath));
+
+// API 404 Handler
 app.use('/api/*', (req, res) => {
   res.status(404).json({ success: false, message: `API endpoint '${req.originalUrl}' not found` });
+});
+
+// Single Page Application (SPA) fallback for client routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 // Global Error Handler
@@ -59,11 +73,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`=======================================================`);
-  console.log(`🚀 CivicLens AI Civic Platform Server running on port ${PORT}`);
-  console.log(`📡 API Base: http://localhost:${PORT}/api`);
-  console.log(`🔒 Authentication & Role-based Authorization active`);
-  console.log(`🧠 AI Classification & Spatial Clustering Hub initialized`);
-  console.log(`=======================================================`);
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`=======================================================`);
+    console.log(`🚀 CivicLens AI Civic Platform Server running on port ${PORT}`);
+    console.log(`📡 API Base: http://localhost:${PORT}/api`);
+    console.log(`🔒 Authentication & Role-based Authorization active`);
+    console.log(`🧠 AI Classification & Spatial Clustering Hub initialized`);
+    console.log(`=======================================================`);
+  });
+}
+
+export default app;
