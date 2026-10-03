@@ -145,18 +145,18 @@ export function AuthProvider({ children }) {
       {children}
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl border transition-all transform animate-bounce duration-300 ${
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl border transition-all transform animate-bounce duration-300 bg-white ${
             toast.type === 'error'
-              ? 'bg-rose-950/90 text-rose-200 border-rose-700/50'
+              ? 'text-rose-700 border-rose-200 shadow-rose-500/10'
               : toast.type === 'success'
-              ? 'bg-emerald-950/90 text-emerald-200 border-emerald-700/50'
-              : 'bg-cyan-950/90 text-cyan-200 border-cyan-700/50'
+              ? 'text-emerald-700 border-emerald-200 shadow-emerald-500/10'
+              : 'text-slate-800 border-slate-200 shadow-slate-900/10'
           }`}
         >
           <span className="text-xl">
             {toast.type === 'error' ? '⚠️' : toast.type === 'success' ? '✅' : 'ℹ️'}
           </span>
-          <span className="text-sm font-medium">{toast.message}</span>
+          <span className="text-sm font-bold text-slate-800">{toast.message}</span>
         </div>
       )}
     </AuthContext.Provider>

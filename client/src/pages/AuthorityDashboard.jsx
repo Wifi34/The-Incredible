@@ -24,7 +24,7 @@ export function AuthorityDashboard({ setCurrentTab }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedIssue, setSelectedIssue] = useState(null);
-  const [activeTab, setActiveTab] = useState('QUEUE'); // QUEUE, MAP, WORK_PROGRESS
+  const [activeTab, setActiveTab] = useState('QUEUE');
   const [progressValue, setProgressValue] = useState(75);
   const [selectedTeamId, setSelectedTeamId] = useState('');
   const [afterImageUrl, setAfterImageUrl] = useState('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80');
@@ -126,39 +126,39 @@ export function AuthorityDashboard({ setCurrentTab }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
       {/* Top Officer Jurisdiction Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-amber-950/40 border border-slate-800 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
+            <span className="text-xs font-mono text-amber-700 font-bold uppercase tracking-wider bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
               {user?.designation || 'Zonal Authority Officer'} • Badge: {user?.badgeNumber || 'AUTH-RD-1204'}
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Authority Command & Priority Queue
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300">
+          <p className="text-xs sm:text-sm text-slate-500">
             Road-level aggregated master hubs ranked dynamically by AI impact score & citizen report volume.
           </p>
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950 border border-slate-800">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 border border-slate-200">
           <button
             onClick={() => setActiveTab('QUEUE')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'QUEUE'
-                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Priority Queue
           </button>
           <button
             onClick={() => setActiveTab('MAP')}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'MAP'
-                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Ward Telemetry Map
@@ -166,41 +166,41 @@ export function AuthorityDashboard({ setCurrentTab }) {
         </div>
       </div>
 
-      {/* Metrics Row (Section 14) */}
+      {/* Metrics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-slate-400 uppercase">Total Issues</div>
-          <div className="text-xl font-black text-white mt-1">{stats?.totalAssigned || priorityQueue.length}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-slate-500 uppercase">Total Issues</div>
+          <div className="text-xl font-black text-slate-900 mt-1">{stats?.totalAssigned || priorityQueue.length}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-rose-400 uppercase">Critical (81–100)</div>
-          <div className="text-xl font-black text-rose-400 mt-1">{stats?.criticalCount || 2}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-rose-600 uppercase">Critical (81–100)</div>
+          <div className="text-xl font-black text-rose-600 mt-1">{stats?.criticalCount || 2}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-orange-400 uppercase">High Priority</div>
-          <div className="text-xl font-black text-orange-400 mt-1">{stats?.highCount || 1}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-orange-600 uppercase">High Priority</div>
+          <div className="text-xl font-black text-orange-600 mt-1">{stats?.highCount || 1}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-amber-400 uppercase">Pending</div>
-          <div className="text-xl font-black text-amber-400 mt-1">{stats?.pendingCount || 1}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-amber-600 uppercase">Pending</div>
+          <div className="text-xl font-black text-amber-600 mt-1">{stats?.pendingCount || 1}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-cyan-400 uppercase">In Progress</div>
-          <div className="text-xl font-black text-cyan-400 mt-1">{stats?.inProgressCount || 2}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-blue-600 uppercase">In Progress</div>
+          <div className="text-xl font-black text-blue-600 mt-1">{stats?.inProgressCount || 2}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-emerald-400 uppercase">Resolved</div>
-          <div className="text-xl font-black text-emerald-400 mt-1">{stats?.resolvedCount || 1}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-emerald-600 uppercase">Resolved</div>
+          <div className="text-xl font-black text-emerald-600 mt-1">{stats?.resolvedCount || 1}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
-          <div className="text-[10px] font-bold text-rose-500 uppercase">SLA Breached</div>
-          <div className="text-xl font-black text-rose-500 mt-1">{stats?.slaBreachedCount || 1}</div>
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs">
+          <div className="text-[10px] font-bold text-rose-600 uppercase">SLA Breached</div>
+          <div className="text-xl font-black text-rose-600 mt-1">{stats?.slaBreachedCount || 1}</div>
         </div>
       </div>
 
       {activeTab === 'MAP' ? (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white">Authorized Jurisdiction Live Map</h3>
+          <h3 className="text-lg font-bold text-slate-900">Authorized Jurisdiction Live Map</h3>
           <InteractiveMap
             masterIssues={priorityQueue}
             onSelectIssue={(issue) => {
@@ -210,14 +210,14 @@ export function AuthorityDashboard({ setCurrentTab }) {
           />
         </div>
       ) : (
-        /* Priority Queue Layout (Section 13, 15, 16, 17, 18) */
+        /* Priority Queue Layout */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Smart Priority Queue List */}
           <div className="lg:col-span-5 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <span>AI Dynamic Priority Queue</span>
-                <span className="text-xs font-mono text-amber-400 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                <span className="text-xs font-mono text-amber-800 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 font-bold">
                   {priorityQueue.length} Active Hubs
                 </span>
               </h3>
@@ -235,53 +235,53 @@ export function AuthorityDashboard({ setCurrentTab }) {
                       setProgressValue(item.progress || 0);
                       setSelectedTeamId(item.assignedTeamId || item.recommendedTeam?.id || '');
                     }}
-                    className={`p-4 rounded-2xl cursor-pointer border transition-all shadow-xl space-y-3 ${
+                    className={`p-4 rounded-2xl cursor-pointer border transition-all shadow-xs space-y-3 ${
                       isSelected
-                        ? 'bg-slate-900 border-amber-400 ring-1 ring-amber-400/50'
-                        : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                        ? 'bg-amber-50/50 border-amber-400 ring-2 ring-amber-300/40 shadow-sm'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center font-mono font-bold text-xs text-slate-300">
+                        <span className="w-6 h-6 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center font-mono font-bold text-xs text-slate-700">
                           #{index + 1}
                         </span>
-                        <span className="text-xs font-bold text-white leading-tight">
+                        <span className="text-xs font-bold text-slate-900 leading-tight">
                           {item.roadName}
                         </span>
                       </div>
 
                       <div
-                        className={`px-2.5 py-0.5 rounded-lg text-xs font-black uppercase border ${
+                        className={`px-2 py-0.5 rounded-lg text-xs font-extrabold uppercase border ${
                           isCritical
-                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
-                            : 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                            : 'bg-orange-50 text-orange-700 border-orange-200'
                         }`}
                       >
                         Priority {item.priorityScore}/100
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2 rounded-xl bg-slate-950/80 border border-slate-800/80 text-slate-300">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700">
                       <div>
                         <span className="text-slate-500">Reports: </span>
-                        <strong className="text-cyan-400 font-bold">{item.complaintCount} Complaints</strong>
+                        <strong className="text-blue-700 font-bold">{item.complaintCount} Complaints</strong>
                       </div>
                       <div>
                         <span className="text-slate-500">Affected: </span>
-                        <strong className="text-indigo-300 font-bold">{item.affectedCitizens} Citizens</strong>
+                        <strong className="text-indigo-700 font-bold">{item.affectedCitizens} Citizens</strong>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
                     <div className="space-y-1">
-                      <div className="flex justify-between text-[10px] text-slate-400">
+                      <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
                         <span>Work Progress ({item.status})</span>
-                        <span className="text-cyan-400 font-bold">{item.progress}%</span>
+                        <span className="text-blue-600 font-bold">{item.progress}%</span>
                       </div>
-                      <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-cyan-500 to-emerald-500 h-1.5 rounded-full"
+                          className="bg-gradient-to-r from-blue-600 to-emerald-500 h-1.5 rounded-full"
                           style={{ width: `${item.progress}%` }}
                         />
                       </div>
@@ -295,76 +295,76 @@ export function AuthorityDashboard({ setCurrentTab }) {
           {/* Right Column: Selected Master Issue Management Center */}
           {selectedIssue && (
             <div className="lg:col-span-7 space-y-6">
-              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl space-y-6">
+              <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-6">
                 {/* Header info */}
-                <div className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-800">
+                <div className="flex flex-wrap items-start justify-between gap-3 pb-4 border-b border-slate-100">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                      <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
                         {selectedIssue.masterCode}
                       </span>
                       {selectedIssue.isHotspot && (
-                        <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                        <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
                           🔥 HOTSPOT {selectedIssue.hotspotGrowth}
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold text-white mt-1">
+                    <h3 className="text-xl font-bold text-slate-900 mt-1">
                       {selectedIssue.roadName}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">{selectedIssue.landmark}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{selectedIssue.landmark}</p>
                   </div>
 
                   <div className="text-right">
-                    <div className="text-2xl font-black text-rose-400">
+                    <div className="text-2xl font-black text-rose-600">
                       {selectedIssue.priorityScore}/100
                     </div>
-                    <div className="text-[10px] font-extrabold uppercase text-slate-400">
+                    <div className="text-[10px] font-extrabold uppercase text-slate-500">
                       AI SEVERITY: {selectedIssue.severity}
                     </div>
                   </div>
                 </div>
 
-                {/* Road Impact & Aggregation Summary (Section 11 & 12) */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs">
+                {/* Road Impact & Aggregation Summary */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs">
                   <div>
-                    <div className="text-[10px] text-slate-500">Total Reports</div>
-                    <div className="text-base font-black text-cyan-400">{selectedIssue.complaintCount}</div>
+                    <div className="text-[10px] text-slate-500 font-semibold">Total Reports</div>
+                    <div className="text-base font-black text-blue-700">{selectedIssue.complaintCount}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-500">Affected Citizens</div>
-                    <div className="text-base font-black text-indigo-400">{selectedIssue.affectedCitizens}</div>
+                    <div className="text-[10px] text-slate-500 font-semibold">Affected Citizens</div>
+                    <div className="text-base font-black text-indigo-700">{selectedIssue.affectedCitizens}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-500">SLA Status</div>
-                    <div className={`text-xs font-bold mt-1 ${selectedIssue.slaStatus === 'BREACHED' ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    <div className="text-[10px] text-slate-500 font-semibold">SLA Status</div>
+                    <div className={`text-xs font-bold mt-1 ${selectedIssue.slaStatus === 'BREACHED' ? 'text-rose-600' : 'text-emerald-600'}`}>
                       {selectedIssue.slaStatus}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] text-slate-500">Assigned Team</div>
-                    <div className="text-xs font-bold text-white mt-1 truncate">
+                    <div className="text-[10px] text-slate-500 font-semibold">Assigned Team</div>
+                    <div className="text-xs font-bold text-slate-800 mt-1 truncate">
                       {selectedIssue.assignedTeam?.name || 'Pending Dispatch'}
                     </div>
                   </div>
                 </div>
 
-                {/* Team Assignment Drawer (Section 16) */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+                {/* Team Assignment Drawer */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Wrench className="w-3.5 h-3.5 text-amber-400" />
+                    <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Wrench className="w-3.5 h-3.5 text-amber-600" />
                       <span>AI-Recommended Field Team Assignment</span>
                     </label>
-                    <span className="text-[11px] text-slate-400">Matched by Department & Distance</span>
+                    <span className="text-[11px] text-slate-500">Matched by Department & Distance</span>
                   </div>
 
                   {selectedIssue.recommendedTeam && (
-                    <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs text-amber-200 flex items-start gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-bold">Recommended: {selectedIssue.recommendedTeam.name}</span>
-                        <div className="text-[11px] text-slate-300 mt-0.5">{selectedIssue.recommendationReason}</div>
+                        <div className="text-[11px] text-slate-600 mt-0.5">{selectedIssue.recommendationReason}</div>
                       </div>
                     </div>
                   )}
@@ -373,7 +373,7 @@ export function AuthorityDashboard({ setCurrentTab }) {
                     <select
                       value={selectedTeamId}
                       onChange={(e) => setSelectedTeamId(e.target.value)}
-                      className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-amber-500"
                     >
                       <option value="">Select Field Maintenance Team...</option>
                       <option value="team_road_3">Road Maintenance Team #3 (Lead: Er. Suresh Kadam - 2.4 km away - 4 tasks)</option>
@@ -386,21 +386,21 @@ export function AuthorityDashboard({ setCurrentTab }) {
                     <button
                       onClick={() => handleAssignTeam(selectedIssue.id, selectedTeamId)}
                       disabled={!selectedTeamId}
-                      className="px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold shadow-md transition-all whitespace-nowrap"
+                      className="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 text-white rounded-xl text-xs font-bold shadow-xs transition-all whitespace-nowrap"
                     >
                       [ASSIGN TEAM]
                     </button>
                   </div>
                 </div>
 
-                {/* Work Progress Controller (Section 17 & 18) */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-4">
+                {/* Work Progress Controller */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                    <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-blue-600" />
                       <span>Live Work Progress Percentage (0% — 100%)</span>
                     </label>
-                    <span className="text-sm font-black text-cyan-400">{progressValue}% Complete</span>
+                    <span className="text-sm font-black text-blue-700">{progressValue}% Complete</span>
                   </div>
 
                   {/* Progress Buttons Row */}
@@ -415,8 +415,8 @@ export function AuthorityDashboard({ setCurrentTab }) {
                         }}
                         className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                           progressValue === pct
-                            ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-lg shadow-cyan-500/20'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                            ? 'bg-blue-600 border-blue-600 text-white shadow-xs'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                         }`}
                       >
                         {pct}%
@@ -424,22 +424,22 @@ export function AuthorityDashboard({ setCurrentTab }) {
                     ))}
                   </div>
 
-                  <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-blue-600 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${progressValue}%` }}
                     />
                   </div>
                 </div>
 
-                {/* Resolution Submission & Before/After Upload (Section 25 & 26) */}
-                <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-3">
+                {/* Resolution Submission & Before/After Upload */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Upload Post-Repair Image & Submit Resolution</span>
                     </label>
-                    <span className="text-[11px] text-slate-400">AI Verification Required</span>
+                    <span className="text-[11px] text-slate-500">AI Verification Required</span>
                   </div>
 
                   <input
@@ -447,12 +447,12 @@ export function AuthorityDashboard({ setCurrentTab }) {
                     value={afterImageUrl}
                     onChange={(e) => setAfterImageUrl(e.target.value)}
                     placeholder="Paste restored surface image URL..."
-                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-emerald-500"
                   />
 
                   <button
                     onClick={() => handleSubmitResolution(selectedIssue.id)}
-                    className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-extrabold shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold shadow-xs transition-all flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>Upload Resolution Photo & Run AI Quality Audit</span>

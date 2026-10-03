@@ -31,39 +31,39 @@ export function LoginPage({ setCurrentTab }) {
   return (
     <div className="max-w-md mx-auto px-4 py-12 space-y-6 animate-fadeIn">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center mx-auto shadow-lg shadow-cyan-500/20">
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center mx-auto shadow-md shadow-blue-500/20">
           <ShieldAlert className="w-6 h-6 text-white" />
         </div>
-        <h2 className="text-2xl font-black text-white">Sign In to CivicSense</h2>
-        <p className="text-xs text-slate-400">
+        <h2 className="text-2xl font-black text-slate-900">Sign In to CivicSense</h2>
+        <p className="text-xs text-slate-500">
           Access your role-specific dashboard (Citizen, Authority, or Administrator)
         </p>
       </div>
 
       {/* Quick Test Credentials Box */}
-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2.5">
-        <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+      <div className="p-5 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-3">
+        <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
           ⚡ 1-Click Fast Persona Login
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => handleQuickLogin('citizen@civicsense.gov', 'Citizen@123', 'citizen_dashboard')}
-            className="p-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-700/50 text-cyan-300 text-xs font-bold transition-all text-center"
+            className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition-all text-center"
           >
             Citizen
           </button>
           <button
             type="button"
             onClick={() => handleQuickLogin('authority.roads@civicsense.gov', 'Authority@123', 'authority_dashboard')}
-            className="p-2 rounded-xl bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 text-amber-300 text-xs font-bold transition-all text-center"
+            className="p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold transition-all text-center"
           >
             Authority
           </button>
           <button
             type="button"
             onClick={() => handleQuickLogin('admin@civicsense.gov', 'Admin@123', 'admin_dashboard')}
-            className="p-2 rounded-xl bg-purple-950/60 hover:bg-purple-900/80 border border-purple-700/50 text-purple-300 text-xs font-bold transition-all text-center"
+            className="p-2.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 text-xs font-bold transition-all text-center"
           >
             Admin
           </button>
@@ -71,47 +71,55 @@ export function LoginPage({ setCurrentTab }) {
       </div>
 
       {/* Standard Login Form */}
-      <form onSubmit={handleSubmit} className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl space-y-4">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 shadow-sm space-y-4">
         <div>
-          <label className="text-xs text-slate-300 font-semibold block mb-1">Email Address</label>
+          <label className="text-xs text-slate-700 font-semibold block mb-1">Email Address</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
           />
         </div>
 
         <div>
-          <label className="text-xs text-slate-300 font-semibold block mb-1">Password</label>
+          <label className="text-xs text-slate-700 font-semibold block mb-1">Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-cyan-600/30 transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
         >
-          <LogIn className="w-4 h-4" />
-          <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
+          {loading ? (
+            <span>Signing In...</span>
+          ) : (
+            <>
+              <LogIn className="w-4 h-4" />
+              <span>Sign In to Dashboard</span>
+            </>
+          )}
         </button>
 
         <div className="text-center pt-2">
-          <span className="text-xs text-slate-400">New citizen? </span>
-          <button
-            type="button"
-            onClick={() => setCurrentTab('register')}
-            className="text-xs font-bold text-cyan-400 hover:underline"
-          >
-            Create Citizen Account
-          </button>
+          <p className="text-xs text-slate-500">
+            Don't have an account?{' '}
+            <button
+              type="button"
+              onClick={() => setCurrentTab('register')}
+              className="text-blue-600 font-bold hover:underline"
+            >
+              Register as Citizen
+            </button>
+          </p>
         </div>
       </form>
     </div>

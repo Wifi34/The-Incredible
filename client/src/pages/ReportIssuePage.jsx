@@ -38,7 +38,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
   // Live Camera states & refs
   const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [facingMode, setFacingMode] = useState('environment'); // 'environment' (back) or 'user' (front)
+  const [facingMode, setFacingMode] = useState('environment');
   const [cameraError, setCameraError] = useState(null);
   const [cameraLoading, setCameraLoading] = useState(false);
 
@@ -69,7 +69,6 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     setCameraLoading(true);
     setCameraError(null);
 
-    // Stop any existing stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
@@ -98,7 +97,6 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     } catch (err) {
       console.warn('Live webcam error, falling back to native camera input:', err);
       setCameraError('Direct camera stream failed. You can use native mobile camera.');
-      // If permission is denied or desktop without camera, trigger native camera file input
       if (nativeCameraInputRef.current) {
         nativeCameraInputRef.current.click();
       }
@@ -127,12 +125,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    // Scale canvas to video frame dimensions
     canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Convert to compressed JPEG Data URL
     const photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
     setImageUrl(photoDataUrl);
     setImageSource('camera');
@@ -153,7 +149,6 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     const reader = new FileReader();
     reader.onload = (event) => {
       const rawDataUrl = event.target.result;
-      // Compress image via off-screen canvas if > 800px
       const img = new Image();
       img.onload = () => {
         const maxDim = 1200;
@@ -296,18 +291,18 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
       {/* Live Camera Modal */}
       {isCameraOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4">
-          <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl overflow-hidden border border-cyan-500/40 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center p-4">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-2xl space-y-4">
             {/* Modal Header */}
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                <span className="text-sm font-bold text-white">Live Camera Capture</span>
+                <span className="text-sm font-bold text-slate-900">Live Camera Capture</span>
               </div>
               <button
                 type="button"
                 onClick={stopCamera}
-                className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -324,18 +319,18 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               />
 
               {/* Viewfinder Target Guidelines */}
-              <div className="absolute inset-8 border-2 border-dashed border-cyan-400/40 rounded-2xl pointer-events-none flex items-center justify-center">
-                <div className="w-8 h-8 border-t-2 border-l-2 border-cyan-400 absolute top-0 left-0 -mt-1 -ml-1" />
-                <div className="w-8 h-8 border-t-2 border-r-2 border-cyan-400 absolute top-0 right-0 -mt-1 -mr-1" />
-                <div className="w-8 h-8 border-b-2 border-l-2 border-cyan-400 absolute bottom-0 left-0 -mb-1 -ml-1" />
-                <div className="w-8 h-8 border-b-2 border-r-2 border-cyan-400 absolute bottom-0 right-0 -mb-1 -mr-1" />
-                <span className="text-[11px] font-semibold text-cyan-300/80 bg-slate-950/80 px-2.5 py-1 rounded-full border border-cyan-500/30">
+              <div className="absolute inset-8 border-2 border-dashed border-white/50 rounded-2xl pointer-events-none flex items-center justify-center">
+                <div className="w-8 h-8 border-t-2 border-l-2 border-white absolute top-0 left-0 -mt-1 -ml-1" />
+                <div className="w-8 h-8 border-t-2 border-r-2 border-white absolute top-0 right-0 -mt-1 -mr-1" />
+                <div className="w-8 h-8 border-b-2 border-l-2 border-white absolute bottom-0 left-0 -mb-1 -ml-1" />
+                <div className="w-8 h-8 border-b-2 border-r-2 border-white absolute bottom-0 right-0 -mb-1 -mr-1" />
+                <span className="text-[11px] font-semibold text-white bg-slate-900/80 px-3 py-1 rounded-full shadow-md">
                   Align defect in center frame
                 </span>
               </div>
 
               {cameraLoading && (
-                <div className="absolute inset-0 bg-slate-950/80 flex items-center justify-center text-cyan-400 text-xs gap-2">
+                <div className="absolute inset-0 bg-white/90 flex items-center justify-center text-blue-600 text-xs gap-2">
                   <RefreshCw className="w-5 h-5 animate-spin" />
                   <span>Accessing camera...</span>
                 </div>
@@ -343,15 +338,15 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             </div>
 
             {/* Camera Controls */}
-            <div className="p-4 flex items-center justify-around bg-slate-950/80 border-t border-slate-800">
+            <div className="p-4 flex items-center justify-around bg-slate-50 border-t border-slate-100">
               {/* Flip Camera */}
               <button
                 type="button"
                 onClick={toggleFacingMode}
-                className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all flex flex-col items-center gap-1 text-[10px] font-semibold"
+                className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-all flex flex-col items-center gap-1 text-[10px] font-bold shadow-xs"
                 title="Switch Camera (Front/Back)"
               >
-                <FlipHorizontal className="w-5 h-5 text-cyan-400" />
+                <FlipHorizontal className="w-5 h-5 text-blue-600" />
                 <span>Flip</span>
               </button>
 
@@ -359,9 +354,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               <button
                 type="button"
                 onClick={capturePhoto}
-                className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 p-1 shadow-lg shadow-cyan-500/40 hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
+                className="w-16 h-16 rounded-full bg-blue-600 p-1 shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
               >
-                <div className="w-full h-full rounded-full border-4 border-white/80 flex items-center justify-center bg-cyan-400/20">
+                <div className="w-full h-full rounded-full border-4 border-white flex items-center justify-center bg-blue-500">
                   <Camera className="w-6 h-6 text-white" />
                 </div>
               </button>
@@ -370,9 +365,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               <button
                 type="button"
                 onClick={stopCamera}
-                className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all flex flex-col items-center gap-1 text-[10px] font-semibold"
+                className="p-3 rounded-2xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-all flex flex-col items-center gap-1 text-[10px] font-bold shadow-xs"
               >
-                <X className="w-5 h-5 text-rose-400" />
+                <X className="w-5 h-5 text-rose-600" />
                 <span>Cancel</span>
               </button>
             </div>
@@ -382,24 +377,24 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
       {/* Header */}
       <div className="space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs font-bold">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold">
           <Sparkles className="w-3.5 h-3.5" />
           <span>AI Assisted Civic Intake</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
           Report a Public Civic Issue
         </h2>
-        <p className="text-xs sm:text-sm text-slate-300">
+        <p className="text-xs sm:text-sm text-slate-500">
           Capture a photo directly with your camera or select from your gallery. CivicSense AI with Gemini classifies and routes automatically.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Step 1: Upload Photo / Take Live Camera Photo */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-bold text-white flex items-center gap-2">
-              <Camera className="w-4 h-4 text-cyan-400" />
+            <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Camera className="w-4 h-4 text-blue-600" />
               <span>1. Issue Photo (Live Camera or Gallery)</span>
             </label>
             <span className="text-xs text-slate-400">Camera / JPG / PNG / WebP</span>
@@ -411,17 +406,17 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             <button
               type="button"
               onClick={() => startCamera('environment')}
-              className="p-4 rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/50 to-blue-950/40 hover:border-cyan-400 hover:from-cyan-900/60 hover:to-blue-900/50 transition-all text-left flex items-center gap-3.5 group shadow-lg"
+              className="p-4 rounded-2xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100/80 hover:border-blue-300 transition-all text-left flex items-center gap-3.5 group shadow-xs"
             >
-              <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-slate-950 transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center group-hover:scale-105 transition-all shadow-sm">
                 <Camera className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-sm font-extrabold text-white group-hover:text-cyan-200 transition-colors flex items-center gap-1.5">
+                <div className="text-sm font-extrabold text-slate-900 group-hover:text-blue-700 transition-colors flex items-center gap-1.5">
                   <span>Take Live Photo</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold">Camera</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-blue-100 text-blue-700 border border-blue-200 font-bold">Camera</span>
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-slate-500">
                   Open device camera & capture defect on spot
                 </div>
               </div>
@@ -431,17 +426,17 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-4 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/50 to-purple-950/40 hover:border-indigo-400 hover:from-indigo-900/60 hover:to-purple-900/50 transition-all text-left flex items-center gap-3.5 group shadow-lg"
+              className="p-4 rounded-2xl border border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100/80 hover:border-indigo-300 transition-all text-left flex items-center gap-3.5 group shadow-xs"
             >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center group-hover:scale-105 transition-all shadow-sm">
                 <ImageIcon className="w-6 h-6" />
               </div>
               <div>
-                <div className="text-sm font-extrabold text-white group-hover:text-indigo-200 transition-colors flex items-center gap-1.5">
+                <div className="text-sm font-extrabold text-slate-900 group-hover:text-indigo-700 transition-colors flex items-center gap-1.5">
                   <span>Choose from Gallery</span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">Files</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold">Files</span>
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-slate-500">
                   Select existing photo from phone or computer
                 </div>
               </div>
@@ -451,7 +446,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           {/* Photo Preview & Options */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             {/* Image Preview Box */}
-            <div className="relative sm:col-span-1 h-48 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center group shadow-inner">
+            <div className="relative sm:col-span-1 h-48 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center group shadow-xs">
               {imageUrl ? (
                 <>
                   <img src={imageUrl} alt="Uploaded Civic Defect" className="w-full h-full object-cover" />
@@ -459,22 +454,22 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                     <button
                       type="button"
                       onClick={() => setImageUrl('')}
-                      className="p-1.5 rounded-xl bg-slate-900/80 hover:bg-rose-900 text-slate-300 hover:text-white border border-slate-700 transition-all"
+                      className="p-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 shadow-xs transition-all"
                       title="Remove image"
                     >
-                      <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <div className="absolute bottom-2 left-2 bg-slate-900/90 text-cyan-300 text-[10px] font-bold px-2 py-0.5 rounded border border-slate-700 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-cyan-400" />
+                  <div className="absolute bottom-2 left-2 bg-white/95 text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-blue-600" />
                     <span>{imageSource === 'camera' ? 'Camera Captured' : imageSource === 'gallery' ? 'Gallery Selected' : 'Sample Selected'}</span>
                   </div>
                 </>
               ) : (
-                <div className="text-center p-4 text-slate-500 text-xs space-y-1">
+                <div className="text-center p-4 text-slate-400 text-xs space-y-1">
                   <Camera className="w-7 h-7 mx-auto opacity-40 text-slate-400" />
-                  <div>No photo selected</div>
-                  <div className="text-[10px] text-slate-600">Click Take Live Photo or Gallery</div>
+                  <div className="font-semibold text-slate-600">No photo selected</div>
+                  <div className="text-[10px] text-slate-400">Click Take Live Photo or Gallery</div>
                 </div>
               )}
             </div>
@@ -482,13 +477,13 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             {/* Presets / URL Toggle Section */}
             <div className="sm:col-span-2 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-300 font-semibold">
+                <span className="text-xs text-slate-600 font-semibold">
                   Or use sample demo defect:
                 </span>
                 <button
                   type="button"
                   onClick={() => setShowPresets(!showPresets)}
-                  className="text-xs text-cyan-400 hover:underline font-semibold"
+                  className="text-xs text-blue-600 hover:underline font-bold"
                 >
                   {showPresets ? 'Hide presets' : 'Show presets'}
                 </button>
@@ -507,12 +502,12 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                       }}
                       className={`p-2.5 rounded-xl text-left border text-xs font-semibold transition-all ${
                         imageUrl === sample.url
-                          ? 'bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700'
+                          ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-xs font-bold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300'
                       }`}
                     >
                       <div className="font-bold">{sample.label}</div>
-                      <div className="text-[10px] text-slate-500">{sample.cat}</div>
+                      <div className="text-[10px] text-slate-400">{sample.cat}</div>
                     </button>
                   ))}
                 </div>
@@ -526,20 +521,20 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                   setImageSource('url');
                 }}
                 placeholder="Or paste direct image URL here..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500"
               />
             </div>
           </div>
         </div>
 
         {/* Step 2: Description & Multilingual Input */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <label className="text-sm font-bold text-white flex items-center gap-2">
-              <Globe2 className="w-4 h-4 text-cyan-400" />
+            <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <Globe2 className="w-4 h-4 text-blue-600" />
               <span>2. Problem Description (English, Hindi or Marathi)</span>
             </label>
-            <span className="text-xs text-slate-400">Gemini AI NLP Intelligence</span>
+            <span className="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">Gemini AI NLP Powered</span>
           </div>
 
           {/* Quick Multilingual Prompts */}
@@ -549,9 +544,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                 key={idx}
                 type="button"
                 onClick={() => setDescription(p.text)}
-                className="px-3 py-1.5 rounded-xl bg-slate-950/80 hover:bg-slate-800 border border-slate-800 text-[11px] text-slate-300 hover:text-white transition-all text-left"
+                className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[11px] text-slate-700 transition-all text-left shadow-xs"
               >
-                <span className="text-cyan-400 font-bold">{p.lang}: </span>
+                <span className="text-blue-700 font-bold">{p.lang}: </span>
                 <span className="italic truncate">{p.text.slice(0, 35)}...</span>
               </button>
             ))}
@@ -562,70 +557,70 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the issue (e.g. 'Road pe bada gaddha hai', 'खड्डा खूप खोल आहे', 'Deep pothole causing vehicle breakdown')..."
-            className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500"
           />
 
           {/* Live AI Real-time Detection Box */}
           {aiAnalysis && (
-            <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 space-y-2.5 animate-fadeIn">
+            <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-2.5 animate-fadeIn">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
-                  <span className="text-xs font-bold text-cyan-200">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-blue-900">
                     Gemini AI Classification: {aiAnalysis.classification?.category}
                   </span>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[11px] font-extrabold">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-extrabold shadow-xs">
                   Confidence: {aiAnalysis.aiConfidence}%
                 </span>
               </div>
 
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-slate-700 font-medium">
                 {aiAnalysis.classification?.detectedSummary}
               </p>
 
               {aiAnalysis.multiIssueDetected && (
-                <div className="p-2 rounded-lg bg-amber-950/60 border border-amber-500/40 text-xs text-amber-200 flex items-center gap-2">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                   <span>
                     Multiple civic issues detected: {aiAnalysis.classification?.category} + {aiAnalysis.secondaryCategories?.join(', ')}. Linked sub-tasks will be created.
                   </span>
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
-                <span>Calculated Severity: <strong className="text-rose-400">{aiAnalysis.priority?.score}/100 ({aiAnalysis.priority?.priorityLevel})</strong></span>
-                <span>Category: <strong>{category}</strong></span>
+              <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
+                <span>Calculated Severity: <strong className="text-rose-600">{aiAnalysis.priority?.score}/100 ({aiAnalysis.priority?.priorityLevel})</strong></span>
+                <span>Category: <strong className="text-slate-900">{category}</strong></span>
               </div>
             </div>
           )}
         </div>
 
         {/* Step 3: Location & Ward */}
-        <div className="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4 shadow-xl">
-          <label className="text-sm font-bold text-white flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-cyan-400" />
+        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-sm">
+          <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-blue-600" />
             <span>3. Affected Road & Ward Location</span>
           </label>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Road / Landmark Name</label>
+              <label className="text-xs text-slate-600 font-semibold mb-1 block">Road / Landmark Name</label>
               <input
                 type="text"
                 value={roadName}
                 onChange={(e) => setRoadName(e.target.value)}
                 placeholder="e.g. Ward 12 Main Road, Laxmi Market Road"
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 mb-1 block">Municipal Ward</label>
+              <label className="text-xs text-slate-600 font-semibold mb-1 block">Municipal Ward</label>
               <select
                 value={wardId}
                 onChange={(e) => setWardId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
               >
                 <option value="ward_12">Ward 12 - Shivaji Nagar & University Area</option>
                 <option value="ward_8">Ward 8 - Laxmi Road & Commercial Market</option>
@@ -637,10 +632,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
           {/* Smart Duplicate Warning if Ward 12 Main Road */}
           {roadName.toLowerCase().includes('ward 12') && (
-            <div className="p-3.5 rounded-xl bg-orange-950/40 border border-orange-500/40 text-xs text-orange-200 flex items-start gap-2.5">
-              <AlertTriangle className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+            <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-orange-900 flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-white">Smart Duplicate Hub Active: </span>
+                <span className="font-bold text-slate-900">Smart Duplicate Hub Active: </span>
                 There are already <strong>20 reports</strong> on Ward 12 Main Road. Submitting here will automatically link your complaint to <strong>Master Issue #R1028</strong>, elevating authority priority!
               </div>
             </div>
@@ -653,9 +648,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               id="anonToggle"
               checked={anonymous}
               onChange={(e) => setAnonymous(e.target.checked)}
-              className="w-4 h-4 rounded text-cyan-600 focus:ring-0 bg-slate-950 border-slate-700"
+              className="w-4 h-4 rounded text-blue-600 focus:ring-0 bg-slate-100 border-slate-300"
             />
-            <label htmlFor="anonToggle" className="text-xs text-slate-300 font-semibold cursor-pointer">
+            <label htmlFor="anonToggle" className="text-xs text-slate-700 font-semibold cursor-pointer">
               Report anonymously (hides personal name & contact info from public records)
             </label>
           </div>
@@ -666,7 +661,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           <button
             type="button"
             onClick={() => setCurrentTab('citizen_dashboard')}
-            className="px-5 py-3 rounded-2xl bg-slate-800 text-slate-300 hover:text-white text-xs font-bold transition-all"
+            className="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
           >
             Cancel
           </button>
@@ -674,7 +669,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-extrabold text-xs shadow-xl shadow-cyan-600/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            className="px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs shadow-md shadow-blue-600/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
           >
             {loading ? (
               <span>AI Processing & Submitting...</span>

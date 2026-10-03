@@ -27,47 +27,47 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
   const getRoleBadgeColor = () => {
     switch (role) {
       case 'ADMIN':
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'AUTHORITY':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        return 'bg-amber-50 text-amber-700 border-amber-200';
       default:
-        return 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+        return 'bg-blue-50 text-blue-700 border-blue-200';
     }
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-40 w-full border-b border-slate-200/80 bg-white/95 backdrop-blur-xl shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentTab('landing')}>
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 border border-cyan-400/30">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-600 flex items-center justify-center shadow-md shadow-blue-500/20 border border-blue-400/30">
               <ShieldAlert className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent">
+                <span className="font-extrabold text-xl tracking-tight text-slate-900">
                   CivicSense
                 </span>
-                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold">
+                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
                   AI v2.6
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium tracking-wide">
+              <p className="text-[10px] text-slate-500 font-medium tracking-wide">
                 Smart Civic Issue & Authority Engine
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1.5">
             {/* Public Tab */}
             <button
               onClick={() => setCurrentTab('landing')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 currentTab === 'landing'
-                  ? 'bg-slate-800 text-cyan-400 border border-slate-700'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                  ? 'bg-slate-100 text-blue-700 border border-slate-200 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               Overview & Live Map
@@ -80,8 +80,8 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   onClick={() => setCurrentTab('citizen_dashboard')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     currentTab === 'citizen_dashboard'
-                      ? 'bg-slate-800 text-cyan-400 border border-slate-700'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                      ? 'bg-slate-100 text-blue-700 border border-slate-200 shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   My Dashboard
@@ -90,8 +90,8 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   onClick={() => setCurrentTab('report_issue')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                     currentTab === 'report_issue'
-                      ? 'bg-cyan-600 text-white shadow-md shadow-cyan-600/30'
-                      : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/20'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                      : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
                   }`}
                 >
                   <FilePlus className="w-3.5 h-3.5" />
@@ -106,8 +106,8 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   onClick={() => setCurrentTab('authority_dashboard')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     currentTab === 'authority_dashboard'
-                      ? 'bg-slate-800 text-amber-400 border border-slate-700'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                      ? 'bg-amber-50 text-amber-800 border border-amber-200 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   Priority Queue & Roads
@@ -121,8 +121,8 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   onClick={() => setCurrentTab('admin_dashboard')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     currentTab === 'admin_dashboard'
-                      ? 'bg-slate-800 text-purple-400 border border-slate-700'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
+                      ? 'bg-purple-50 text-purple-800 border border-purple-200 shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
                   Work Monitoring Center
@@ -133,9 +133,9 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
             {/* 1-Click Interactive End-to-End Demo Trigger */}
             <button
               onClick={onOpenDemo}
-              className="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-rose-500 to-orange-500 text-white flex items-center gap-1.5 shadow-lg shadow-orange-500/25 hover:scale-105 active:scale-95 transition-all"
+              className="ml-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 text-white flex items-center gap-1.5 shadow-md shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all"
             >
-              <PlayCircle className="w-3.5 h-3.5 animate-pulse" />
+              <PlayCircle className="w-3.5 h-3.5" />
               Live 20-Report Demo
             </button>
           </div>
@@ -146,16 +146,16 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
             <div className="relative">
               <button
                 onClick={() => setShowRoleMenu(!showRoleMenu)}
-                className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all ${getRoleBadgeColor()}`}
+                className={`flex items-center gap-2 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all shadow-xs ${getRoleBadgeColor()}`}
               >
-                <span className="w-2 h-2 rounded-full bg-current animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-current" />
                 <span>Role: {role}</span>
-                <span className="text-[10px] text-slate-400">▼</span>
+                <span className="text-[10px] opacity-60">▼</span>
               </button>
 
               {showRoleMenu && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl p-2 z-50 animate-fadeIn">
-                  <div className="text-[11px] font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider">
+                <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-white border border-slate-200 shadow-xl p-2 z-50 animate-fadeIn">
+                  <div className="text-[11px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider">
                     Switch Test Persona
                   </div>
                   <button
@@ -164,12 +164,12 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                       setCurrentTab('citizen_dashboard');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg text-xs hover:bg-cyan-500/10 text-cyan-200 flex items-center gap-2"
+                    className="w-full text-left px-2.5 py-2 rounded-xl text-xs hover:bg-blue-50 text-slate-700 hover:text-blue-700 flex items-center gap-2 transition-colors"
                   >
-                    <UserCheck className="w-4 h-4 text-cyan-400" />
+                    <UserCheck className="w-4 h-4 text-blue-600" />
                     <div>
                       <div className="font-bold">Citizen Rahul Sharma</div>
-                      <div className="text-[10px] text-slate-400">Ward 12 Resident</div>
+                      <div className="text-[10px] text-slate-500">Ward 12 Resident</div>
                     </div>
                   </button>
                   <button
@@ -178,12 +178,12 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                       setCurrentTab('authority_dashboard');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg text-xs hover:bg-amber-500/10 text-amber-200 flex items-center gap-2"
+                    className="w-full text-left px-2.5 py-2 rounded-xl text-xs hover:bg-amber-50 text-slate-700 hover:text-amber-800 flex items-center gap-2 transition-colors"
                   >
-                    <Building2 className="w-4 h-4 text-amber-400" />
+                    <Building2 className="w-4 h-4 text-amber-600" />
                     <div>
                       <div className="font-bold">Officer Rajesh Deshmukh</div>
-                      <div className="text-[10px] text-slate-400">Road Infra Authority</div>
+                      <div className="text-[10px] text-slate-500">Road Infra Authority</div>
                     </div>
                   </button>
                   <button
@@ -192,12 +192,12 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                       setCurrentTab('admin_dashboard');
                       setShowRoleMenu(false);
                     }}
-                    className="w-full text-left px-2.5 py-2 rounded-lg text-xs hover:bg-purple-500/10 text-purple-200 flex items-center gap-2"
+                    className="w-full text-left px-2.5 py-2 rounded-xl text-xs hover:bg-purple-50 text-slate-700 hover:text-purple-800 flex items-center gap-2 transition-colors"
                   >
-                    <Users className="w-4 h-4 text-purple-400" />
+                    <Users className="w-4 h-4 text-purple-600" />
                     <div>
                       <div className="font-bold">Dr. K. Mehta (Admin)</div>
-                      <div className="text-[10px] text-slate-400">Chief Municipal Director</div>
+                      <div className="text-[10px] text-slate-500">Chief Municipal Director</div>
                     </div>
                   </button>
                 </div>
@@ -206,20 +206,20 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
 
             {/* Profile info */}
             {user ? (
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <img
                   src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
                   alt={user.name}
-                  className="w-8 h-8 rounded-full border border-slate-700 object-cover"
+                  className="w-8 h-8 rounded-full border border-slate-200 object-cover"
                 />
                 <div className="text-left hidden lg:block">
-                  <div className="text-xs font-bold text-slate-200 leading-tight">{user.name}</div>
-                  <div className="text-[10px] text-slate-400">{user.city || 'Pune'}</div>
+                  <div className="text-xs font-bold text-slate-800 leading-tight">{user.name}</div>
+                  <div className="text-[10px] text-slate-500">{user.city || 'Pune'}</div>
                 </div>
                 <button
                   onClick={logout}
                   title="Logout"
-                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -228,13 +228,13 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentTab('login')}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white"
+                  className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => setCurrentTab('register')}
-                  className="px-3 py-1.5 text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg"
+                  className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs"
                 >
                   Register
                 </button>
@@ -246,13 +246,13 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={onOpenDemo}
-              className="px-2 py-1 rounded text-xs font-bold bg-orange-500 text-white"
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white"
             >
               Demo
             </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-400 hover:text-white"
+              className="p-2 text-slate-600 hover:text-slate-900"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -262,9 +262,9 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-slate-800 bg-slate-900 p-4 space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <span className="text-xs text-slate-400">Current Role:</span>
+        <div className="md:hidden border-b border-slate-200 bg-white p-4 space-y-3 shadow-lg">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span className="text-xs text-slate-500">Current Role:</span>
             <span className={`px-2 py-0.5 rounded text-xs font-bold border ${getRoleBadgeColor()}`}>{role}</span>
           </div>
           <div className="grid grid-cols-3 gap-2 py-2">
@@ -274,7 +274,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 setCurrentTab('citizen_dashboard');
                 setMobileMenuOpen(false);
               }}
-              className="p-2 text-center rounded bg-slate-800 text-xs text-cyan-300"
+              className="p-2 text-center rounded-xl bg-blue-50 text-xs font-bold text-blue-700 border border-blue-100"
             >
               Citizen
             </button>
@@ -284,7 +284,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 setCurrentTab('authority_dashboard');
                 setMobileMenuOpen(false);
               }}
-              className="p-2 text-center rounded bg-slate-800 text-xs text-amber-300"
+              className="p-2 text-center rounded-xl bg-amber-50 text-xs font-bold text-amber-800 border border-amber-100"
             >
               Authority
             </button>
@@ -294,7 +294,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 setCurrentTab('admin_dashboard');
                 setMobileMenuOpen(false);
               }}
-              className="p-2 text-center rounded bg-slate-800 text-xs text-purple-300"
+              className="p-2 text-center rounded-xl bg-purple-50 text-xs font-bold text-purple-800 border border-purple-100"
             >
               Admin
             </button>
@@ -304,7 +304,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               setCurrentTab('landing');
               setMobileMenuOpen(false);
             }}
-            className="w-full text-left py-2 text-sm text-slate-300 font-semibold"
+            className="w-full text-left py-2 text-sm text-slate-700 font-semibold"
           >
             Overview & Map
           </button>
@@ -315,7 +315,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   setCurrentTab('citizen_dashboard');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-left py-2 text-sm text-slate-300 font-semibold"
+                className="w-full text-left py-2 text-sm text-slate-700 font-semibold"
               >
                 Citizen Dashboard
               </button>
@@ -324,7 +324,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   setCurrentTab('report_issue');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-left py-2 text-sm text-cyan-400 font-semibold"
+                className="w-full text-left py-2 text-sm text-blue-600 font-bold"
               >
                 Report New Problem
               </button>
@@ -336,7 +336,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 setCurrentTab('authority_dashboard');
                 setMobileMenuOpen(false);
               }}
-              className="w-full text-left py-2 text-sm text-amber-400 font-semibold"
+              className="w-full text-left py-2 text-sm text-amber-700 font-bold"
             >
               Authority Priority Queue
             </button>
@@ -347,7 +347,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 setCurrentTab('admin_dashboard');
                 setMobileMenuOpen(false);
               }}
-              className="w-full text-left py-2 text-sm text-purple-400 font-semibold"
+              className="w-full text-left py-2 text-sm text-purple-700 font-bold"
             >
               Admin Work Monitoring Center
             </button>

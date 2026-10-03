@@ -23,7 +23,7 @@ function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Top Universal Navbar */}
       <Navbar
         currentTab={currentTab}
@@ -94,13 +94,13 @@ function MainApp() {
       />
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-400 space-y-2">
+      <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <span className="font-extrabold text-white">CivicSense</span>
+          <span className="font-extrabold text-slate-900">CivicSense</span>
           <span>•</span>
           <span>AI-Powered Smart Civic Issue Reporting, Tracking & Authority Management</span>
         </div>
-        <p className="text-slate-400">
+        <p className="text-slate-500">
           Connecting Citizens, Municipal Authorities, and City Administrators with AI Computer Vision & Spatial Duplicate Clustering.
         </p>
       </footer>
