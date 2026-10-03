@@ -53,6 +53,33 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
   const pending = complaints.filter(c => c.status === 'REPORTED' || c.status === 'NOT STARTED').length;
 
   const [verificationReward, setVerificationReward] = useState(null);
+  const [cashConversionModal, setCashConversionModal] = useState(null);
+  const [converting, setConverting] = useState(false);
+
+  const handleConvertCoins = async (blocks = 1) => {
+    setConverting(true);
+    try {
+      const res = await fetch('/api/complaints/convert-coins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('civicsense_token')}`
+        },
+        body: JSON.stringify({ blocks })
+      });
+      const data = await res.json();
+      if (data.success) {
+        updateCoins(data.remainingCoins);
+        setCashConversionModal(data);
+      } else {
+        showToast(data.message || 'Conversion failed', 'error');
+      }
+    } catch (err) {
+      showToast('Error converting coins to rupees', 'error');
+    } finally {
+      setConverting(false);
+    }
+  };
 
   const handleVerifySuccess = async (complaintId) => {
     try {
@@ -114,7 +141,7 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
               Welcome, {user?.name || 'Citizen'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
-              Track your civic submissions, live field repairs, and verify completed works.
+              Track your civic submissions, live field repairs, and earn 20 to 50 coins per report!
             </p>
           </div>
 
@@ -124,13 +151,13 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
               className="px-6 py-3.5 rounded-2xl font-extrabold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
               <FilePlus className="w-4 h-4" />
-              <span>Report New Problem (+50–100 Coins)</span>
+              <span>Report New Problem (+20–50 Coins)</span>
             </button>
           </div>
         </div>
 
         {/* 🪙 Civic Karma Rewards Wallet Tile */}
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50 via-white to-yellow-50 border border-amber-200 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-50 via-white to-yellow-50 border border-amber-200 shadow-sm flex flex-col justify-between space-y-3.5">
           <div className="flex items-center justify-between">
             <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider border border-amber-300">
               Civic Karma Wallet
@@ -158,16 +185,44 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
           </div>
 
           {/* 200 Coins = 5 Rupees Rate Badge */}
-          <div className="px-3 py-1.5 rounded-xl bg-amber-100/80 border border-amber-300 text-center text-[11px] font-black text-amber-950 flex items-center justify-center gap-1.5 shadow-2xs">
+          <div className="px-3 py-1.5 rounded-xl bg-amber-100/90 border border-amber-300 text-center text-[11px] font-black text-amber-950 flex items-center justify-center gap-1.5 shadow-2xs">
             <span>💰 Exchange Rate:</span>
             <span className="bg-amber-300 px-2 py-0.5 rounded-md text-slate-950 font-black">200 Coins = ₹5 Rupees</span>
           </div>
 
+          {/* 200 Coins Milestone Progress / Instant Convert Button */}
+          {(user?.coins || 0) >= 200 ? (
+            <button
+              type="button"
+              disabled={converting}
+              onClick={() => handleConvertCoins(1)}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs shadow-md shadow-emerald-600/20 hover:scale-102 active:scale-98 transition-all flex items-center justify-center gap-1.5 animate-bounce"
+            >
+              <span>{converting ? 'Converting...' : '💸 Convert 200 Coins ➔ ₹5.00 Rupees Cash'}</span>
+            </button>
+          ) : (
+            <div className="space-y-1 bg-white/80 p-2.5 rounded-xl border border-amber-200">
+              <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                <span>Next ₹5.00 Rupees Milestone:</span>
+                <span className="text-amber-800 font-black">{(user?.coins || 0)} / 200 Coins</span>
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                <div
+                  className="bg-amber-400 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, ((user?.coins || 0) / 200) * 100)}%` }}
+                />
+              </div>
+              <div className="text-[9px] text-slate-500 text-center font-semibold">
+                Submit {Math.ceil((200 - (user?.coins || 0)) / 50)} more report(s) to reach 200 Coins (₹5 Rupees)!
+              </div>
+            </div>
+          )}
+
           <button
             onClick={() => setShowRedeemModal(true)}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
+            className="w-full py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition-all hover:scale-101 flex items-center justify-center gap-1.5"
           >
-            <span>🎁 Redeem City Perks (₹{(((user?.coins || 0) / 200) * 5).toFixed(2)})</span>
+            <span>🎁 Redeem Other City Perks</span>
           </button>
         </div>
       </div>
@@ -519,6 +574,57 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition-all hover:scale-102 flex items-center justify-center gap-2"
             >
               <span>Great! Continue to Dashboard (₹{((verificationReward.totalCoins / 200) * 5).toFixed(2)}) ➔</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 💸 Cash Conversion Success Center Modal (200 Coins = ₹5) */}
+      {cashConversionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fadeIn overflow-hidden">
+          <div className="bg-white border-2 border-emerald-400 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden animate-coin-pop z-10">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 via-teal-400 to-green-300 flex items-center justify-center shadow-2xl shadow-emerald-500/40 border-4 border-white animate-bounce">
+              <span className="text-5xl select-none">💵</span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-black uppercase tracking-wider border border-emerald-300 shadow-xs">
+                <span>🎉 Cash Converted Successfully!</span>
+              </div>
+              
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                +{cashConversionModal.rupeesEarned}.00 Rupees Credited!
+              </h3>
+              
+              <p className="text-xs sm:text-sm text-slate-600 font-medium">
+                {cashConversionModal.coinsDeducted} Civic Coins converted at the official rate (<strong>200 Coins = ₹5 Rupees</strong>).
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-left space-y-2 text-xs">
+              <div className="flex justify-between items-center font-bold text-slate-700">
+                <span>Coins Redeemed:</span>
+                <span className="text-rose-600 font-extrabold">-{cashConversionModal.coinsDeducted} 🪙</span>
+              </div>
+              <div className="flex justify-between items-center font-bold text-slate-700">
+                <span>Cash Credited:</span>
+                <span className="text-emerald-700 font-black text-sm">+₹{cashConversionModal.rupeesEarned}.00 INR</span>
+              </div>
+              <div className="pt-2 border-t border-emerald-200 flex justify-between items-center font-black text-slate-900">
+                <span>Remaining Coins:</span>
+                <span className="text-amber-800 text-sm">🪙 {cashConversionModal.remainingCoins} Coins</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setCashConversionModal(null)}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition-all hover:scale-102 flex items-center justify-center gap-2"
+            >
+              <span>Awesome! Back to Dashboard ➔</span>
             </button>
           </div>
         </div>

@@ -688,10 +688,13 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
         {/* Submit Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-          {/* Potential Reward Incentive Hint */}
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-800 bg-amber-50 px-3.5 py-2 rounded-2xl border border-amber-200 shadow-xs">
+          {/* Potential Reward Incentive Hint (20-50 Coins) */}
+          <div className="flex items-center gap-2 text-xs font-bold text-amber-900 bg-amber-50 px-4 py-2.5 rounded-2xl border border-amber-300 shadow-xs">
             <span className="text-base select-none">🪙</span>
-            <span>Reward Bounty: <strong>+{50 + (imageUrl ? 25 : 0) + (description.length >= 20 ? 25 : 0)} Civic Coins</strong> on submission</span>
+            <div>
+              <span>Reward Bounty: <strong>+{20 + (imageUrl ? 15 : 0) + (description.length >= 20 ? 15 : 0)} Civic Coins</strong></span>
+              <span className="text-emerald-700 font-extrabold ml-1.5">(200 Coins = ₹5 Rupees)</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
@@ -713,7 +716,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               ) : (
                 <>
                   <span className="text-sm select-none">🪙</span>
-                  <span>Submit Complaint to Authority (+{50 + (imageUrl ? 25 : 0) + (description.length >= 20 ? 25 : 0)} Coins)</span>
+                  <span>Submit Complaint to Authority (+{20 + (imageUrl ? 15 : 0) + (description.length >= 20 ? 15 : 0)} Coins)</span>
                 </>
               )}
             </button>

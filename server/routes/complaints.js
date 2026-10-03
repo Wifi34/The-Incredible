@@ -164,22 +164,23 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       });
     }
 
-    // 6. Award Civic Credit Coins / Karma Points to Citizen
+    // 6. Award Civic Credit Coins (20 to 50 Coins per report submitted)
     const hasPhoto = images && images.length > 0;
     const hasDetailedText = description && description.length >= 20;
-    const coinsEarned = 50 + (hasPhoto ? 25 : 0) + (hasDetailedText ? 25 : 0);
-    const rewardInfo = db.awardCoins(
-      req.user.id,
-      coinsEarned,
-      `Reported ${resolvedCategory} on ${cleanRoadName}`
-    ) || { coinsEarned, totalCoins: (req.user.coins || 0) + coinsEarned };
+    const coinsEarned = 20 + (hasPhoto ? 15 : 0) + (hasDetailedText ? 15 : 0);
+
+    const citizen = db.users.find(u => u.id === req.user.id);
+    if (citizen) {
+      citizen.coins = (citizen.coins || 0) + coinsEarned;
+    }
+    const totalCoins = citizen ? citizen.coins : ((req.user.coins || 0) + coinsEarned);
 
     // Add Coin Reward Notification
     db.addNotification({
       userId: req.user.id,
       type: 'REWARD_EARNED',
       title: `🪙 +${coinsEarned} Civic Coins Awarded!`,
-      message: `You earned ${coinsEarned} Civic Coins (${hasPhoto ? '+25 Photo bonus ' : ''}${hasDetailedText ? '+25 AI details ' : ''}) for reporting on ${cleanRoadName}! Balance: ${rewardInfo.totalCoins} Coins.`,
+      message: `You earned ${coinsEarned} Civic Coins (${hasPhoto ? '+15 Photo bonus ' : ''}${hasDetailedText ? '+15 Description bonus ' : ''}) for reporting on ${cleanRoadName}! Balance: ${totalCoins} Coins (200 Coins = ₹5 Rupees).`,
       issueId: masterIssue.id
     });
 
@@ -205,17 +206,67 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       masterIssue,
       reward: {
         coinsEarned,
-        totalCoins: rewardInfo.totalCoins,
+        totalCoins,
         reason: 'Civic Hazard Reported',
         breakdown: [
-          { item: 'Base Civic Bounty', amount: 50 },
-          ...(hasPhoto ? [{ item: 'Photo Evidence Bonus', amount: 25 }] : []),
-          ...(hasDetailedText ? [{ item: 'Detailed Description Bonus', amount: 25 }] : [])
+          { item: 'Base Report Bounty', amount: 20 },
+          ...(hasPhoto ? [{ item: 'Photo Evidence Bonus', amount: 15 }] : []),
+          ...(hasDetailedText ? [{ item: 'Detailed Description Bonus', amount: 15 }] : [])
         ]
       }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Failed to submit complaint', error: err.message });
+  }
+});
+
+// 2.5. Convert 200 Coins into ₹5 Rupees Cash / Direct Benefit
+router.post('/convert-coins', authenticateToken, (req, res) => {
+  try {
+    const citizen = db.users.find(u => u.id === req.user.id);
+    const currentCoins = citizen ? (citizen.coins || 0) : (req.user.coins || 0);
+
+    if (currentCoins < 200) {
+      return res.status(400).json({
+        success: false,
+        message: `You need at least 200 coins to convert into ₹5 Rupees. Current balance: ${currentCoins} coins.`
+      });
+    }
+
+    const blocks = Math.max(1, parseInt(req.body.blocks || 1, 10));
+    const coinsToDeduct = blocks * 200;
+
+    if (currentCoins < coinsToDeduct) {
+      return res.status(400).json({
+        success: false,
+        message: `Insufficient coins for ${blocks} conversion block(s). Required: ${coinsToDeduct} coins, Available: ${currentCoins} coins.`
+      });
+    }
+
+    const rupeesEarned = blocks * 5;
+    if (citizen) {
+      citizen.coins -= coinsToDeduct;
+      citizen.convertedRupees = (citizen.convertedRupees || 0) + rupeesEarned;
+    }
+
+    // Add Notification
+    db.addNotification({
+      userId: req.user.id,
+      type: 'REWARD_EARNED',
+      title: `💰 ₹${rupeesEarned} Converted from ${coinsToDeduct} Coins!`,
+      message: `Successfully converted ${coinsToDeduct} Civic Coins into ₹${rupeesEarned} Rupees Cash / Municipal Utility Credit! Remaining balance: ${citizen?.coins || 0} coins.`,
+    });
+
+    res.json({
+      success: true,
+      message: `🎉 Successfully converted ${coinsToDeduct} coins into ₹${rupeesEarned} Rupees!`,
+      coinsDeducted: coinsToDeduct,
+      rupeesEarned,
+      remainingCoins: citizen ? citizen.coins : currentCoins - coinsToDeduct,
+      totalRupeesClaimed: citizen?.convertedRupees || rupeesEarned
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to convert coins', error: err.message });
   }
 });
 
