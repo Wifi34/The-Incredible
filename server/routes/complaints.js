@@ -58,13 +58,23 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req,
       return res.status(400).json({ success: false, message: 'Please provide issue description or upload an image.' });
     }
 
-    const lat = location?.lat || 18.5314;
-    const lng = location?.lng || 73.8446;
-    const cleanRoadName = roadName || 'Ward 12 Main Road';
+    const lat = location?.lat || 21.1458;
+    const lng = location?.lng || 79.0882;
+    const cleanRoadName = roadName || 'West High Court (WHC) Road, Dharampeth';
     const effectiveWardId = wardId || req.user.wardId || 'ward_12';
 
     // 1. AI Classification & NLP Analysis with Google Gemini
     const aiResult = await classifyIssueWithGemini(description, images?.[0], requestedCategory);
+
+    // 1.1 Strict Guard: Reject Human / Non-civic uploads
+    if (aiResult.isHumanOrInvalid || aiResult.isValidCivicDefect === false) {
+      return res.status(400).json({
+        success: false,
+        isHumanOrInvalid: true,
+        message: aiResult.rejectionReason || 'Invalid photo: Human face/person or non-civic subject detected. Please upload only civic defect photos (Potholes, Garbage Dumps, Water Leakage, Broken Streetlights).'
+      });
+    }
+
     const resolvedCategory = requestedCategory || aiResult.category;
 
     // Temporary ID for clustering

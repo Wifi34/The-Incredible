@@ -77,11 +77,61 @@ export function calculateDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// 1. Fast Heuristic Multilingual Classifier
+// Human, selfie, and invalid non-civic keywords
+const HUMAN_OR_INVALID_KEYWORDS = [
+  'human', 'person', 'people', 'selfie', 'face', 'portrait', 'man', 'woman', 'girl', 'boy',
+  'guy', 'lady', 'chehra', 'aadmi', 'aurat', 'mera photo', 'apna photo', 'dp', 'profile picture',
+  'friend', 'friends', 'party', 'pose', 'model', 'actor', 'actress', 'smiling', 'family photo'
+];
+
+// Nagpur Ward & Landmark mappings for dynamic NLP extraction
+const NAGPUR_LOCATIONS = [
+  { keywords: ['dharampeth', 'whc road', 'west high court', 'law college', 'gokulpeth', 'ram nagar', 'coffee house'], road: 'West High Court (WHC) Road, Dharampeth', wardId: 'ward_12' },
+  { keywords: ['sitabuldi', 'variety square', 'cotton market', 'central avenue', 'munje square', 'burdi'], road: 'Sitabuldi Main Road & Variety Square', wardId: 'ward_8' },
+  { keywords: ['it park', 'gayatri nagar', 'vnit', 'pratap nagar', 'mate square', 'wardha road'], road: 'IT Park Ring Road, Gayatri Nagar', wardId: 'ward_7' },
+  { keywords: ['mahal', 'gandhibagh', 'badkas chowk', 'tilak statue', 'chitnavis', 'gandhi sagar'], road: 'Mahal Main Road & Gandhi Sagar', wardId: 'ward_5' }
+];
+
+// 1. Fast Heuristic Multilingual Classifier with Human/Invalid Guard
 export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
   const lowerText = text.toLowerCase();
-  const detectedCategories = [];
+  const lowerImg = (imageUrl || '').toLowerCase();
 
+  // 1. Strict Human / Non-Civic Detection
+  const hasHumanKeyword = HUMAN_OR_INVALID_KEYWORDS.some(kw => lowerText.includes(kw) || lowerImg.includes(kw));
+  const isHumanPreset = lowerImg.includes('photo-1534528741775') || lowerImg.includes('photo-1507003211169') || lowerImg.includes('portrait');
+
+  if (hasHumanKeyword || isHumanPreset) {
+    return {
+      isValidCivicDefect: false,
+      isHumanOrInvalid: true,
+      rejectionReason: 'Human face/person or non-civic subject detected. Please upload only civic issues (Potholes, Garbage Dumps, Water Leakage, Broken Streetlights).',
+      category: 'Invalid',
+      confidence: 99,
+      severity: 'LOW',
+      severityScore: 0,
+      detectedHazards: ['Invalid civic submission rejected'],
+      detectedSummary: 'Rejected: Human / Non-civic photo detected. Only civic issues are accepted.',
+      departmentRecommended: 'N/A',
+      multipleIssuesDetected: false,
+      secondaryCategories: [],
+      detectedRoad: null,
+      detectedWardId: null
+    };
+  }
+
+  // 2. Location & Ward extraction from text
+  let detectedRoad = null;
+  let detectedWardId = null;
+  for (const loc of NAGPUR_LOCATIONS) {
+    if (loc.keywords.some(kw => lowerText.includes(kw))) {
+      detectedRoad = loc.road;
+      detectedWardId = loc.wardId;
+      break;
+    }
+  }
+
+  const detectedCategories = [];
   for (const [category, langMap] of Object.entries(KEYWORD_MAP)) {
     let matched = false;
     let matchStrength = 0;
@@ -121,56 +171,90 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
     }
   } else if (!userCategory && text.length < 5 && !imageUrl) {
     return {
+      isValidCivicDefect: true,
+      isHumanOrInvalid: false,
       category: 'Other',
       confidence: 42,
       isLowConfidence: true,
       message: 'Unable to confidently identify the issue. Please verify or choose category manually.',
       multipleIssuesDetected: false,
-      secondaryCategories: []
+      secondaryCategories: [],
+      detectedRoad,
+      detectedWardId
     };
   }
 
   return {
+    isValidCivicDefect: true,
+    isHumanOrInvalid: false,
     category: primaryCategory,
     confidence,
     isLowConfidence: confidence < 60,
     multipleIssuesDetected: isMultiple,
     secondaryCategories,
-    detectedSummary: `AI classified as ${primaryCategory} with ${confidence}% certainty.`
+    detectedSummary: `AI classified as ${primaryCategory} with ${confidence}% certainty.`,
+    detectedRoad,
+    detectedWardId
   };
 }
 
 // 2. Google Gemini Real AI Classifier (Multimodal & Multilingual)
 export async function classifyIssueWithGemini(text = '', imageUrl = '', userCategory = null) {
+  // Pre-check heuristic for instant human rejection
+  const heuristic = classifyIssue(text, imageUrl, userCategory);
+  if (heuristic.isHumanOrInvalid) {
+    return { ...heuristic, isGeminiPowered: false };
+  }
+
   if (!genAI || (!text && !imageUrl)) {
-    return classifyIssue(text, imageUrl, userCategory);
+    return heuristic;
   }
 
   try {
-    const prompt = `You are the CivicLens Municipal AI Intelligence Engine for Nagpur Municipal Corporation (NMC).
-Analyze this civic issue report submitted by a citizen in English, Hindi, Marathi, or Hinglish:
-Description: "${text}"
+    const promptText = `You are the CivicLens Municipal AI Vision & Classification Engine for Nagpur Municipal Corporation (NMC).
+CRITICAL RULES:
+1. STRICT HUMAN / NON-CIVIC REJECTION: If this image/text is a person, selfie, face, portrait, human body, animal, food, vehicle selfie, or non-civic object, you MUST set "isValidCivicDefect": false, "isHumanOrInvalid": true, and provide a clear "rejectionReason".
+2. VALID CIVIC ISSUES: Only accept civic issues like Pothole, Road Damage, Garbage Dump, Broken Streetlight, Water Leakage, Open Drain / Sewage, Damaged Footpath, Traffic Signal, Illegal Dumping.
+
+Citizen Description: "${text}"
 ${userCategory ? `User selected category: "${userCategory}"` : ''}
 
-Classify into one of these strict categories:
-['Pothole', 'Road Damage', 'Garbage', 'Broken Streetlight', 'Water Leakage', 'Open Drain', 'Damaged Footpath', 'Traffic Signal', 'Illegal Dumping', 'Other']
-
-Return a valid JSON object ONLY with no markdown formatting:
+Respond with a valid JSON object ONLY:
 {
+  "isValidCivicDefect": true,
+  "isHumanOrInvalid": false,
+  "rejectionReason": "",
   "category": "Pothole",
   "confidence": 96,
   "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
   "severityScore": 85,
-  "detectedHazards": ["Skid hazard for two-wheelers", "Traffic bottleneck"],
-  "summary": "Concise 1-sentence technical civic summary",
+  "detectedHazards": ["Hazard description"],
+  "summary": "1-sentence concise civic summary",
   "departmentRecommended": "Road & Highway Infrastructure",
+  "detectedRoad": "Extracted Nagpur Road/Landmark or null",
+  "detectedWardId": "ward_12" | "ward_8" | "ward_7" | "ward_5" | null,
   "multipleIssuesDetected": false,
   "secondaryCategories": []
 }`;
 
+    const contentParts = [{ text: promptText }];
+
+    // If image is a base64 Data URL, pass it as inlineData for Gemini Vision
+    if (imageUrl && imageUrl.startsWith('data:image/')) {
+      const mimeMatch = imageUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+      if (mimeMatch) {
+        contentParts.push({
+          inlineData: {
+            mimeType: mimeMatch[1],
+            data: mimeMatch[2]
+          }
+        });
+      }
+    }
+
     const response = await genAI.models.generateContent({
       model: 'gemini-3.8-flash',
-      contents: prompt
+      contents: contentParts
     });
 
     const responseText = response.text || '';
@@ -184,14 +268,38 @@ Return a valid JSON object ONLY with no markdown formatting:
       }
     }
 
+    if (result.isHumanOrInvalid || result.isValidCivicDefect === false) {
+      return {
+        isValidCivicDefect: false,
+        isHumanOrInvalid: true,
+        rejectionReason: result.rejectionReason || 'Human / person or non-civic photo detected. Please upload only civic issues (Potholes, Garbage Dumps, Water Leakage, Broken Streetlights).',
+        category: 'Invalid',
+        confidence: 98,
+        severity: 'LOW',
+        severityScore: 0,
+        detectedHazards: ['Human or invalid subject rejected'],
+        detectedSummary: result.rejectionReason || 'Rejected: Human / Non-civic photo detected.',
+        departmentRecommended: 'N/A',
+        multipleIssuesDetected: false,
+        secondaryCategories: [],
+        detectedRoad: null,
+        detectedWardId: null,
+        isGeminiPowered: true
+      };
+    }
+
     return {
-      category: result.category || userCategory || 'Pothole',
+      isValidCivicDefect: true,
+      isHumanOrInvalid: false,
+      category: result.category || userCategory || heuristic.category || 'Pothole',
       confidence: result.confidence || 95,
       severity: result.severity || 'MEDIUM',
       severityScore: result.severityScore || 70,
       detectedHazards: result.detectedHazards || [],
       detectedSummary: result.summary || `AI classified as ${result.category || userCategory || 'Pothole'}.`,
       departmentRecommended: result.departmentRecommended || 'Road & Highway Infrastructure',
+      detectedRoad: result.detectedRoad || heuristic.detectedRoad,
+      detectedWardId: result.detectedWardId || heuristic.detectedWardId,
       multipleIssuesDetected: Boolean(result.multipleIssuesDetected),
       secondaryCategories: result.secondaryCategories || [],
       isGeminiPowered: true

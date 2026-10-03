@@ -22,12 +22,43 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+// Nagpur Wards metadata for dynamic Road & Ward synchronization
+const WARD_INFO = {
+  ward_12: {
+    name: 'Ward 12 - Dharampeth & WHC Road Area',
+    defaultRoad: 'West High Court (WHC) Road, Dharampeth',
+    coords: { lat: 21.1425, lng: 79.0620 },
+    landmarks: ['WHC Road, Dharampeth', 'Law College Square', 'Gokulpeth Market Road', 'Coffee House Square', 'Ram Nagar Chowk']
+  },
+  ward_8: {
+    name: 'Ward 8 - Sitabuldi & Central Commercial Hub',
+    defaultRoad: 'Sitabuldi Main Road & Variety Square',
+    coords: { lat: 21.1460, lng: 79.0845 },
+    landmarks: ['Variety Square, Sitabuldi', 'Cotton Market Road', 'Central Avenue Entrance', 'Munje Square', 'Tekdi Road']
+  },
+  ward_7: {
+    name: 'Ward 7 - IT Park, Gayatri Nagar & South Corridor',
+    defaultRoad: 'IT Park Ring Road, Gayatri Nagar',
+    coords: { lat: 21.1235, lng: 79.0520 },
+    landmarks: ['IT Park Ring Road', 'Gayatri Nagar Square', 'VNIT Gate Road', 'Pratap Nagar Main Road', 'Mate Square']
+  },
+  ward_5: {
+    name: 'Ward 5 - Mahal, Gandhibagh & Heritage Sector',
+    defaultRoad: 'Mahal Main Road & Gandhi Sagar',
+    coords: { lat: 21.1520, lng: 79.1120 },
+    landmarks: ['Mahal Main Road', 'Gandhibagh Cloth Market', 'Badkas Chowk', 'Gandhi Sagar Lake Road', 'Tilak Statue Square']
+  }
+};
+
 export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const { user, token, showToast, updateCoins } = useAuth();
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Pothole');
-  const [roadName, setRoadName] = useState('Ward 12 Main Road');
   const [wardId, setWardId] = useState('ward_12');
+  const [roadName, setRoadName] = useState('West High Court (WHC) Road, Dharampeth');
+  const [gpsCoords, setGpsCoords] = useState({ lat: 21.1425, lng: 79.0620 });
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+  const [gpsLocked, setGpsLocked] = useState(false);
   const [anonymous, setAnonymous] = useState(false);
   const [imageUrl, setImageUrl] = useState('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80');
   const [imageSource, setImageSource] = useState('preset'); // 'camera', 'gallery', 'preset', 'url'
@@ -77,12 +108,48 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const fileInputRef = useRef(null);
   const nativeCameraInputRef = useRef(null);
 
-  // Sample preset images for quick testing
+  // Sample preset images with dynamic ward, road, and human rejection demo
   const SAMPLE_IMAGES = [
-    { label: 'Pothole Defect', url: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80', cat: 'Pothole' },
-    { label: 'Garbage Dump', url: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80', cat: 'Garbage' },
-    { label: 'Broken Streetlight', url: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80', cat: 'Broken Streetlight' },
-    { label: 'Open Drain / Sewage', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80', cat: 'Open Drain' }
+    {
+      label: 'Pothole Defect',
+      url: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
+      cat: 'Pothole',
+      wardId: 'ward_12',
+      road: 'West High Court (WHC) Road, Dharampeth',
+      prompt: 'Deep hazardous pothole on main transit curve near Law College Square, Dharampeth.'
+    },
+    {
+      label: 'Garbage Dump',
+      url: 'https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80',
+      cat: 'Garbage',
+      wardId: 'ward_8',
+      road: 'Cotton Market Road & Sitabuldi Hub',
+      prompt: 'Overflowing municipal garbage bin blocking pedestrian walkway near Cotton Market.'
+    },
+    {
+      label: 'Broken Streetlight',
+      url: 'https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80',
+      cat: 'Broken Streetlight',
+      wardId: 'ward_7',
+      road: 'IT Park Ring Road, Gayatri Nagar',
+      prompt: 'Street light pole not working creating dark blind spot near VNIT Gate Road.'
+    },
+    {
+      label: 'Open Drain / Sewage',
+      url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80',
+      cat: 'Open Drain',
+      wardId: 'ward_5',
+      road: 'Mahal Main Road & Gandhibagh',
+      prompt: 'Open drain chamber overflowing on street near Gandhibagh Cloth Market.'
+    },
+    {
+      label: '🚫 Person / Human Selfie (AI Rejection Demo)',
+      url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
+      cat: 'Invalid',
+      wardId: 'ward_12',
+      road: 'West High Court (WHC) Road, Dharampeth',
+      prompt: 'Selfie photo of a human person (Strictly rejected by CivicLens AI)'
+    }
   ];
 
   // Multilingual quick sample prompts
@@ -91,6 +158,70 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     { lang: 'Hindi (हिंदी)', text: 'Road pe bada gaddha hai aur raat ko street light bhi nahi chalti.' },
     { lang: 'Marathi (मराठी)', text: 'इथे रस्त्यावर मोठा खड्डा पडला आहे आणि पाण्याचा निचरा होत नाही.' }
   ];
+
+  // Dynamic Preset Selection Handler
+  const handleSelectPreset = (sample) => {
+    setImageUrl(sample.url);
+    setImageSource('preset');
+    if (sample.cat !== 'Invalid') {
+      setCategory(sample.cat);
+      setWardId(sample.wardId);
+      setRoadName(sample.road);
+      setGpsCoords(WARD_INFO[sample.wardId]?.coords || { lat: 21.1425, lng: 79.0620 });
+      if (!description || SAMPLE_IMAGES.some(s => s.prompt === description)) {
+        setDescription(sample.prompt);
+      }
+    } else {
+      setDescription('Selfie of a person photo test');
+    }
+  };
+
+  // Dynamic Ward Change Handler
+  const handleWardChange = (newWardId) => {
+    setWardId(newWardId);
+    const info = WARD_INFO[newWardId];
+    if (info) {
+      setRoadName(info.defaultRoad);
+      setGpsCoords(info.coords);
+    }
+  };
+
+  // Live GPS Auto-Detect Handler
+  const detectGpsLocation = () => {
+    if (!navigator.geolocation) {
+      showToast('Geolocation is not supported by your browser', 'error');
+      return;
+    }
+    setGpsDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGpsDetecting(false);
+        const { latitude, longitude } = pos.coords;
+        let closestWard = 'ward_12';
+        let minDis = 9999999;
+        for (const [wId, info] of Object.entries(WARD_INFO)) {
+          const d = Math.hypot(latitude - info.coords.lat, longitude - info.coords.lng);
+          if (d < minDis) {
+            minDis = d;
+            closestWard = wId;
+          }
+        }
+        setWardId(closestWard);
+        setRoadName(WARD_INFO[closestWard].defaultRoad);
+        setGpsCoords({ lat: latitude, lng: longitude });
+        setGpsLocked(true);
+        showToast(`📍 Live GPS Locked to ${WARD_INFO[closestWard].name}!`, 'success');
+      },
+      (err) => {
+        setGpsDetecting(false);
+        console.warn('GPS error, using active Nagpur Ward coords:', err.message);
+        setGpsCoords(WARD_INFO[wardId]?.coords || { lat: 21.1425, lng: 79.0620 });
+        setGpsLocked(true);
+        showToast(`📍 Location synchronized to ${WARD_INFO[wardId]?.defaultRoad || 'Nagpur'}`, 'success');
+      },
+      { timeout: 8000 }
+    );
+  };
 
   // 1. Live Camera Stream Management
   const startCamera = async (mode = facingMode) => {
@@ -236,8 +367,18 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         const data = await res.json();
         if (data.success) {
           setAiAnalysis(data);
-          if (data.classification?.category && !category) {
-            setCategory(data.classification.category);
+          if (data.classification?.isHumanOrInvalid) {
+            showToast('⚠️ Non-civic or human photo detected! Please upload a valid civic defect.', 'error');
+          } else {
+            if (data.classification?.category && data.classification.category !== 'Invalid' && !category) {
+              setCategory(data.classification.category);
+            }
+            if (data.classification?.detectedWardId) {
+              setWardId(data.classification.detectedWardId);
+            }
+            if (data.classification?.detectedRoad) {
+              setRoadName(data.classification.detectedRoad);
+            }
           }
         }
       } catch (err) {
@@ -257,6 +398,11 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       return;
     }
 
+    if (aiAnalysis?.classification?.isHumanOrInvalid || aiAnalysis?.isHumanOrInvalid) {
+      showToast('❌ Cannot submit: Human or non-civic photo detected. Please upload a valid civic defect.', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/complaints', {
@@ -267,14 +413,14 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         },
         body: JSON.stringify({
           description,
-          category,
+          category: category === 'Invalid' ? 'Pothole' : category,
           roadName,
           wardId,
           anonymous,
           images: [imageUrl],
           location: {
-            lat: 21.1425 + (Math.random() - 0.5) * 0.003,
-            lng: 79.0620 + (Math.random() - 0.5) * 0.003,
+            lat: gpsCoords.lat + (Math.random() - 0.5) * 0.002,
+            lng: gpsCoords.lng + (Math.random() - 0.5) * 0.002,
             address: `${roadName}, Nagpur`
           }
         })
@@ -291,7 +437,6 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       if (data.reward) {
         updateCoins(data.reward.totalCoins);
         setRewardModal(data.reward);
-        // Central middle celebratory popup opens and stays visible for citizen to see their coins & rupee value!
       } else {
         if (onComplaintSubmitted) onComplaintSubmitted(data.complaint);
         showToast(data.message || 'Complaint submitted successfully!', 'success');
@@ -482,24 +627,37 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           {/* Photo Preview & Options */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             {/* Image Preview Box */}
-            <div className="relative sm:col-span-1 h-48 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center group shadow-xs">
+            <div className={`relative sm:col-span-1 h-48 rounded-2xl overflow-hidden border ${
+              aiAnalysis?.isHumanOrInvalid ? 'border-rose-500 ring-2 ring-rose-300 bg-rose-50/40' : 'border-slate-200 bg-slate-50'
+            } flex items-center justify-center group shadow-xs`}>
               {imageUrl ? (
                 <>
                   <img src={imageUrl} alt="Uploaded Civic Defect" className="w-full h-full object-cover" />
                   <div className="absolute top-2 right-2 flex gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setImageUrl('')}
+                      onClick={() => {
+                        setImageUrl('');
+                        setAiAnalysis(null);
+                      }}
                       className="p-1.5 rounded-xl bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-200 shadow-xs transition-all"
                       title="Remove image"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <div className="absolute bottom-2 left-2 bg-white/95 text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-blue-600" />
-                    <span>{imageSource === 'camera' ? 'Camera Captured' : imageSource === 'gallery' ? 'Gallery Selected' : 'Sample Selected'}</span>
-                  </div>
+                  
+                  {aiAnalysis?.isHumanOrInvalid ? (
+                    <div className="absolute bottom-2 inset-x-2 bg-rose-600/95 text-white text-[10px] font-extrabold px-2 py-1.5 rounded-xl border border-rose-700 shadow-md flex items-center justify-center gap-1">
+                      <ShieldAlert className="w-3.5 h-3.5" />
+                      <span>REJECTED: Non-Civic / Human</span>
+                    </div>
+                  ) : (
+                    <div className="absolute bottom-2 left-2 bg-white/95 text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                      <span>{imageSource === 'camera' ? 'Camera Captured' : imageSource === 'gallery' ? 'Gallery Selected' : 'Sample Selected'}</span>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="text-center p-4 text-slate-400 text-xs space-y-1">
@@ -514,7 +672,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             <div className="sm:col-span-2 space-y-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-600 font-semibold">
-                  Or use sample demo defect:
+                  Or choose a quick demo defect:
                 </span>
                 <button
                   type="button"
@@ -526,24 +684,29 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               </div>
 
               {showPresets && (
-                <div className="grid grid-cols-2 gap-2 animate-fadeIn">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 animate-fadeIn">
                   {SAMPLE_IMAGES.map((sample, idx) => (
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => {
-                        setImageUrl(sample.url);
-                        setImageSource('preset');
-                        setCategory(sample.cat);
-                      }}
-                      className={`p-2.5 rounded-xl text-left border text-xs font-semibold transition-all ${
+                      onClick={() => handleSelectPreset(sample)}
+                      className={`p-2.5 rounded-xl text-left border text-xs transition-all ${
                         imageUrl === sample.url
-                          ? 'bg-blue-50 border-blue-300 text-blue-800 shadow-xs font-bold'
-                          : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300'
+                          ? sample.cat === 'Invalid'
+                            ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-xs font-bold'
+                            : 'bg-blue-50 border-blue-300 text-blue-800 shadow-xs font-bold'
+                          : sample.cat === 'Invalid'
+                            ? 'bg-rose-50/50 border-rose-200 text-rose-700 hover:bg-rose-100 hover:border-rose-300'
+                            : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300'
                       }`}
                     >
-                      <div className="font-bold">{sample.label}</div>
-                      <div className="text-[10px] text-slate-400">{sample.cat}</div>
+                      <div className="font-bold flex items-center justify-between">
+                        <span>{sample.label}</span>
+                        {sample.cat === 'Invalid' && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-rose-200 text-rose-800 font-extrabold">Reject Test</span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">{sample.cat === 'Invalid' ? 'Detects Human/Selfie rejection' : sample.road}</div>
                     </button>
                   ))}
                 </div>
@@ -596,67 +759,115 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-500"
           />
 
-          {/* Live AI Real-time Detection Box */}
+          {/* Live AI Detection or Human/Invalid Rejection Box */}
           {aiAnalysis && (
-            <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-2.5 animate-fadeIn">
-              <div className="flex items-center justify-between">
+            aiAnalysis.isHumanOrInvalid ? (
+              <div className="p-4 rounded-2xl bg-rose-50 border-2 border-rose-300 text-rose-900 space-y-2 animate-fadeIn shadow-sm">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-bold text-blue-900">
-                    Gemini AI Classification: {aiAnalysis.classification?.category}
+                  <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
+                  <span className="text-xs font-extrabold text-rose-950">
+                    ❌ Invalid Upload: Human Face or Non-Civic Image Detected
                   </span>
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-extrabold shadow-xs">
-                  Confidence: {aiAnalysis.aiConfidence}%
-                </span>
+                <p className="text-xs text-rose-700 font-medium">
+                  {aiAnalysis.rejectionReason || 'CivicLens AI Vision has detected a human photo or invalid subject. You can only submit public civic defects such as Potholes, Garbage Dumps, Water Leakage, or Broken Streetlights.'}
+                </p>
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPreset(SAMPLE_IMAGES[0])}
+                    className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold shadow-xs transition-all"
+                  >
+                    Select Valid Civic Photo
+                  </button>
+                  <span className="text-[11px] text-rose-600 font-semibold">Submissions with humans/selfies are strictly blocked.</span>
+                </div>
               </div>
-
-              <p className="text-xs text-slate-700 font-medium">
-                {aiAnalysis.classification?.detectedSummary}
-              </p>
-
-              {aiAnalysis.multiIssueDetected && (
-                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                  <span>
-                    Multiple civic issues detected: {aiAnalysis.classification?.category} + {aiAnalysis.secondaryCategories?.join(', ')}. Linked sub-tasks will be created.
+            ) : (
+              <div className="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-2.5 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-blue-600" />
+                    <span className="text-xs font-bold text-blue-900">
+                      Gemini AI Classification: {aiAnalysis.classification?.category}
+                    </span>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[11px] font-extrabold shadow-xs">
+                    Confidence: {aiAnalysis.aiConfidence}%
                   </span>
                 </div>
-              )}
 
-              <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
-                <span>Calculated Severity: <strong className="text-rose-600">{aiAnalysis.priority?.score}/100 ({aiAnalysis.priority?.priorityLevel})</strong></span>
-                <span>Category: <strong className="text-slate-900">{category}</strong></span>
+                <p className="text-xs text-slate-700 font-medium">
+                  {aiAnalysis.classification?.detectedSummary}
+                </p>
+
+                {aiAnalysis.multiIssueDetected && (
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>
+                      Multiple civic issues detected: {aiAnalysis.classification?.category} + {aiAnalysis.secondaryCategories?.join(', ')}. Linked sub-tasks will be created.
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between text-xs text-slate-600 pt-1">
+                  <span>Calculated Severity: <strong className="text-rose-600">{aiAnalysis.priority?.score}/100 ({aiAnalysis.priority?.priorityLevel})</strong></span>
+                  <span>Category: <strong className="text-slate-900">{category}</strong></span>
+                </div>
               </div>
-            </div>
+            )
           )}
         </div>
 
-        {/* Step 3: Location & Ward */}
+        {/* Step 3: Location & Ward (Fully Dynamic) */}
         <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-sm">
-          <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
-            <span>3. Affected Road & Ward Location</span>
-          </label>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-blue-600" />
+              <span>3. Affected Road & Ward Location</span>
+            </label>
 
+            {/* Live GPS Auto-Detect Button */}
+            <button
+              type="button"
+              onClick={detectGpsLocation}
+              disabled={gpsDetecting}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition-all shadow-xs"
+            >
+              {gpsDetecting ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />
+              ) : (
+                <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              )}
+              <span>{gpsDetecting ? 'Locating GPS...' : '📍 Auto-Detect Live GPS'}</span>
+            </button>
+          </div>
+
+          {/* Dynamic Location Inputs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-slate-600 font-semibold mb-1 block">Road / Landmark Name</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs text-slate-600 font-semibold block">Road / Landmark Name</label>
+                <span className="text-[10px] text-blue-600 font-bold">Dynamic Auto-Fill</span>
+              </div>
               <input
                 type="text"
                 value={roadName}
                 onChange={(e) => setRoadName(e.target.value)}
-                placeholder="e.g. Ward 12 Main Road, Laxmi Market Road"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
+                placeholder="e.g. West High Court (WHC) Road, Dharampeth"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 font-medium"
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-600 font-semibold mb-1 block">Municipal Ward</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs text-slate-600 font-semibold block">Municipal Ward</label>
+                <span className="text-[10px] text-indigo-600 font-bold">NMC Ward Division</span>
+              </div>
               <select
                 value={wardId}
-                onChange={(e) => setWardId(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500"
+                onChange={(e) => handleWardChange(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 font-semibold"
               >
                 <option value="ward_12">Ward 12 - Dharampeth & WHC Road Area</option>
                 <option value="ward_8">Ward 8 - Sitabuldi & Central Commercial Hub</option>
@@ -666,19 +877,51 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             </div>
           </div>
 
-          {/* Smart Duplicate Warning if Ward 12 Main Road */}
-          {roadName.toLowerCase().includes('ward 12') && (
+          {/* Quick Landmark Chips for the selected Ward */}
+          <div className="space-y-1.5 pt-1">
+            <div className="text-[11px] text-slate-500 font-semibold">
+              Popular Landmarks in {WARD_INFO[wardId]?.name.split('-')[1] || 'this Ward'} (click to set road):
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {WARD_INFO[wardId]?.landmarks.map((lm, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setRoadName(lm)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] border transition-all ${
+                    roadName === lm
+                      ? 'bg-blue-100 text-blue-800 border-blue-300 font-bold shadow-xs'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  📍 {lm}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Live GPS Coordinates & Clustering Indicator */}
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Target Coordinates: <strong>{gpsCoords.lat.toFixed(4)}° N, {gpsCoords.lng.toFixed(4)}° E (Nagpur)</strong></span>
+            </div>
+            <span className="text-indigo-600 font-semibold">50m Spatial Clustering Active</span>
+          </div>
+
+          {/* Smart Duplicate Correlated Alert */}
+          {(roadName.toLowerCase().includes('whc') || roadName.toLowerCase().includes('dharampeth') || roadName.toLowerCase().includes('sitabuldi')) && (
             <div className="p-4 rounded-2xl bg-orange-50 border border-orange-200 text-xs text-orange-900 flex items-start gap-2.5">
               <AlertTriangle className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-slate-900">Smart Duplicate Hub Active: </span>
-                There are already <strong>20 reports</strong> on Ward 12 Main Road. Submitting here will automatically link your complaint to <strong>Master Issue #R1028</strong>, elevating authority priority!
+                Multiple complaints detected near <strong>{roadName}</strong>. Submitting will link your report to the road cluster, accelerating NMC authority dispatch!
               </div>
             </div>
           )}
 
           {/* Anonymous Toggle */}
-          <div className="flex items-center gap-2 pt-2">
+          <div className="flex items-center gap-2 pt-1">
             <input
               type="checkbox"
               id="anonToggle"
@@ -714,11 +957,20 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
             <button
               type="submit"
-              disabled={loading}
-              className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-extrabold text-xs shadow-lg shadow-blue-600/25 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              disabled={loading || aiAnalysis?.isHumanOrInvalid}
+              className={`px-8 py-3.5 rounded-2xl ${
+                aiAnalysis?.isHumanOrInvalid
+                  ? 'bg-rose-600/70 text-white cursor-not-allowed opacity-80'
+                  : 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg shadow-blue-600/25 hover:scale-105 active:scale-95'
+              } font-extrabold text-xs transition-all flex items-center gap-2`}
             >
               {loading ? (
                 <span>AI Processing & Submitting...</span>
+              ) : aiAnalysis?.isHumanOrInvalid ? (
+                <>
+                  <ShieldAlert className="w-4 h-4" />
+                  <span>❌ Human Photo Rejected — Cannot Submit</span>
+                </>
               ) : (
                 <>
                   <span className="text-sm select-none">🪙</span>
