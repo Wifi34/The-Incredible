@@ -752,51 +752,50 @@ class Database {
       },
       {
         id: 'C1002',
-        citizenId: 'usr_citizen_2',
-        citizenName: 'Priya Patil',
-        citizenEmail: 'priya@civicsense.gov',
-        citizenPhone: '+91 98765 43211',
-        category: 'Pothole',
-        roadName: 'Ward 12 Main Road',
-        description: 'Deep road crater near Shanti Heights gate on Ward 12 Main Road. Causing massive traffic jam.',
-        images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
+        citizenId: 'usr_citizen_1',
+        citizenName: 'Rahul Sharma',
+        citizenEmail: 'citizen@civicsense.gov',
+        citizenPhone: '+91 98765 43210',
+        category: 'Broken Streetlight',
+        roadName: 'Tech Park IT Link Road',
+        description: '3 consecutive street lights are completely dark from Cyber Tower curve to metro station.',
+        images: ['https://images.unsplash.com/photo-1509114397022-ed747cca3f65?auto=format&fit=crop&w=800&q=80'],
         location: {
-          lat: 18.5318,
-          lng: 73.8450,
-          address: 'Ward 12 Main Road, Pune'
+          lat: 18.5463,
+          lng: 73.9033,
+          address: 'Kalyani Nagar IT Link, Pune 411014'
         },
-        wardId: 'ward_12',
-        masterIssueId: 'R1028',
-        severity: 'CRITICAL',
-        priorityScore: 96,
-        aiConfidence: 96,
+        wardId: 'ward_7',
+        masterIssueId: 'R1030',
+        severity: 'HIGH',
+        priorityScore: 74,
+        aiConfidence: 91,
         aiDetection: {
-          detectedObject: 'Multiple Road Potholes',
-          confidence: 0.96,
-          estimatedDepthCm: 22,
-          safetyRiskLevel: 'HIGH_ACCIDENT_RISK'
+          detectedObject: 'Dark Streetlight Fixtures & Luminaire Failure',
+          confidence: 0.91,
+          safetyRiskLevel: 'NIGHT_HAZARD'
         },
         status: 'IN PROGRESS',
-        assignedAuthorityId: 'usr_authority_1',
-        assignedTeamId: 'team_road_3',
+        assignedAuthorityId: 'usr_authority_3',
+        assignedTeamId: 'team_elec_4',
         anonymous: false,
-        createdAt: '2026-10-02T11:05:00.000Z',
-        updatedAt: '2026-10-03T09:00:00.000Z'
+        createdAt: '2026-10-02T18:40:00.000Z',
+        updatedAt: '2026-10-03T08:00:00.000Z'
       },
       {
-        id: 'C1021',
-        citizenId: 'usr_citizen_3',
-        citizenName: 'Amit Verma',
-        citizenEmail: 'amit@civicsense.gov',
-        citizenPhone: '+91 98765 43212',
+        id: 'C1003',
+        citizenId: 'usr_citizen_1',
+        citizenName: 'Rahul Sharma',
+        citizenEmail: 'citizen@civicsense.gov',
+        citizenPhone: '+91 98765 43210',
         category: 'Garbage',
         roadName: 'Laxmi Market Road',
-        description: 'Road pe kachra phaila hua hai aur bada gaddha bhi hai flower market ke samne.',
+        description: 'Overflowing commercial waste bins near flower market blocking entire footpath.',
         images: ['https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=800&q=80'],
         location: {
           lat: 18.5167,
           lng: 73.8562,
-          address: 'Laxmi Market Road, Pune'
+          address: 'Laxmi Road, Market Yard, Pune, Maharashtra 411002'
         },
         wardId: 'ward_8',
         masterIssueId: 'R1029',
@@ -814,21 +813,84 @@ class Database {
         anonymous: false,
         createdAt: '2026-10-02T08:15:00.000Z',
         updatedAt: '2026-10-03T10:15:00.000Z'
+      },
+      {
+        id: 'C1004',
+        citizenId: 'usr_citizen_1',
+        citizenName: 'Rahul Sharma',
+        citizenEmail: 'citizen@civicsense.gov',
+        citizenPhone: '+91 98765 43210',
+        category: 'Open Drain',
+        roadName: 'Old Town Heritage Road',
+        description: 'Hazardous broken drain slab and foul sewage overflow near Kasba Ganpati chowk.',
+        images: ['https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=800&q=80'],
+        location: {
+          lat: 18.5204,
+          lng: 73.8567,
+          address: 'Kasba Peth Main Road, Pune 411011'
+        },
+        wardId: 'ward_5',
+        masterIssueId: 'R1031',
+        severity: 'CRITICAL',
+        priorityScore: 94,
+        aiConfidence: 95,
+        aiDetection: {
+          detectedObject: 'Collapsed Drain Cover Slab',
+          confidence: 0.95,
+          safetyRiskLevel: 'SEVERE_PEDESTRIAN_HAZARD'
+        },
+        status: 'REPORTED',
+        assignedAuthorityId: null,
+        assignedTeamId: null,
+        anonymous: false,
+        createdAt: '2026-10-03T07:30:00.000Z',
+        updatedAt: '2026-10-03T07:30:00.000Z'
+      },
+      {
+        id: 'C1005',
+        citizenId: 'usr_citizen_1',
+        citizenName: 'Rahul Sharma',
+        citizenEmail: 'citizen@civicsense.gov',
+        citizenPhone: '+91 98765 43210',
+        category: 'Pothole',
+        roadName: 'Fergusson College (FC) Road',
+        description: 'Deep road depression near Goodluck Chowk successfully resurfaced and verified.',
+        images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
+        location: {
+          lat: 18.5246,
+          lng: 73.8415,
+          address: 'FC Road, Shivaji Nagar, Pune 411004'
+        },
+        wardId: 'ward_12',
+        masterIssueId: 'R1032',
+        severity: 'HIGH',
+        priorityScore: 82,
+        aiConfidence: 93,
+        aiDetection: {
+          detectedObject: 'Fixed Pothole & Re-asphalted Surface',
+          confidence: 0.96
+        },
+        status: 'COMPLETED',
+        assignedAuthorityId: 'usr_authority_1',
+        assignedTeamId: 'team_road_3',
+        anonymous: false,
+        createdAt: '2026-09-28T11:00:00.000Z',
+        updatedAt: '2026-09-30T16:00:00.000Z'
       }
     ];
 
-    // Seed dummy complaints C1003 to C1020 for the 20-complaint road aggregation demo
-    for (let i = 3; i <= 20; i++) {
+    // Seed dummy complaints C1006 to C1020 for the 20-complaint road aggregation demo (assigned to other citizens)
+    for (let i = 6; i <= 20; i++) {
       const paddedId = `C10${i < 10 ? '0' + i : i}`;
       this.complaints.push({
         id: paddedId,
-        citizenId: `usr_citizen_${(i % 3) + 1}`,
+        citizenId: `usr_citizen_${((i % 4) + 2)}`,
         citizenName: i % 2 === 0 ? `Citizen Reporter #${i}` : `Resident Ward 12 (#${i})`,
         citizenEmail: `citizen${i}@civicsense.gov`,
         citizenPhone: `+91 98765 432${i < 10 ? '0' + i : i}`,
         category: i % 4 === 0 ? 'Road Damage' : (i % 5 === 0 ? 'Broken Streetlight' : 'Pothole'),
         roadName: 'Ward 12 Main Road',
-        description: `Persistent severe pothole and surface crack at chainage km 1.${i} on Ward 12 Main Road.`,
+        description: `Correlated report #${i}: Pothole and road crack near pole #${10 + i} on Ward 12 Main Road.`,
         images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80'],
         location: {
           lat: 18.5314 + (Math.random() - 0.5) * 0.004,
