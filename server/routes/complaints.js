@@ -3,6 +3,7 @@ import { db } from '../db.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 import {
   classifyIssue,
+  classifyIssueWithGemini,
   calculatePriorityScore,
   findOrCreateMasterIssue,
   verifyResolutionAI
@@ -11,17 +12,17 @@ import {
 const router = express.Router();
 
 // 1. AI Real-time Image & Text Analyzer (Preview before submitting)
-router.post('/ai-analyze', authenticateToken, (req, res) => {
+router.post('/ai-analyze', authenticateToken, async (req, res) => {
   try {
     const { text, imageUrl, userCategory } = req.body;
 
-    const classification = classifyIssue(text, imageUrl, userCategory);
+    const classification = await classifyIssueWithGemini(text, imageUrl, userCategory);
     const priority = calculatePriorityScore({
       category: classification.category,
       roadImportance: 'MAIN_ROAD',
       complaintCount: 1,
       affectedCitizens: 1,
-      safetyRisk: 'HIGH',
+      safetyRisk: classification.severity || 'HIGH',
       hasImage: Boolean(imageUrl)
     });
 
@@ -32,7 +33,8 @@ router.post('/ai-analyze', authenticateToken, (req, res) => {
       aiConfidence: classification.confidence,
       multiIssueDetected: classification.multipleIssuesDetected,
       secondaryCategories: classification.secondaryCategories,
-      safetyRiskLevel: priority.priorityLevel
+      safetyRiskLevel: priority.priorityLevel,
+      isGeminiPowered: classification.isGeminiPowered
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'AI Analysis error', error: err.message });
@@ -40,7 +42,7 @@ router.post('/ai-analyze', authenticateToken, (req, res) => {
 });
 
 // 2. Submit New Civic Complaint (Citizen)
-router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), (req, res) => {
+router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), async (req, res) => {
   try {
     const {
       description,
@@ -61,8 +63,8 @@ router.post('/', authenticateToken, requireRole('CITIZEN', 'ADMIN'), (req, res) 
     const cleanRoadName = roadName || 'Ward 12 Main Road';
     const effectiveWardId = wardId || req.user.wardId || 'ward_12';
 
-    // 1. AI Classification & NLP Analysis
-    const aiResult = classifyIssue(description, images?.[0], requestedCategory);
+    // 1. AI Classification & NLP Analysis with Google Gemini
+    const aiResult = await classifyIssueWithGemini(description, images?.[0], requestedCategory);
     const resolvedCategory = requestedCategory || aiResult.category;
 
     // Temporary ID for clustering
