@@ -92,14 +92,135 @@ const NAGPUR_LOCATIONS = [
   { keywords: ['mahal', 'gandhibagh', 'badkas chowk', 'tilak statue', 'chitnavis', 'gandhi sagar'], road: 'Mahal Main Road & Gandhi Sagar', wardId: 'ward_5' }
 ];
 
-// 1. Fast Heuristic Multilingual Classifier with Human/Invalid Guard
+// Category Profiles with complete Department, Severity, Hazards & Action Summaries
+const CIVIC_DEFECT_PROFILES = {
+  Pothole: {
+    category: 'Pothole',
+    department: 'Road & Highway Infrastructure',
+    severity: 'HIGH',
+    severityScore: 88,
+    hazards: [
+      'Two-wheeler skid & high-speed fall hazard',
+      'Vehicular tyre rim & suspension damage',
+      'Monsoon water pooling & hidden crater depth'
+    ],
+    summary: 'Deep structural road pothole detected on active vehicular transit lane. Immediate cold-mix / asphalt patch required.',
+    imageKeywords: ['photo-1515162816999', 'pothole', 'crater', 'asphalt', 'road_pothole']
+  },
+  'Road Damage': {
+    category: 'Road Damage',
+    department: 'Road & Highway Infrastructure',
+    severity: 'HIGH',
+    severityScore: 82,
+    hazards: [
+      'Asphalt surface peeling & uneven gradient',
+      'Vehicular traction loss on braking',
+      'Progression into deep road craters'
+    ],
+    summary: 'Extensive bituminous surface degradation and alligator cracking detected. Road milling and resurfacing recommended.',
+    imageKeywords: ['cracked_road', 'asphalt_peel', 'road_damage']
+  },
+  Garbage: {
+    category: 'Garbage',
+    department: 'Solid Waste & Sanitation Management',
+    severity: 'HIGH',
+    severityScore: 78,
+    hazards: [
+      'Public hygiene risk & foul odor emissions',
+      'Vector-borne disease & bacterial proliferation',
+      'Pedestrian walkway & storm drain blockage'
+    ],
+    summary: 'Overflowing municipal waste & garbage dump detected. Compactor vehicle & sanitization crew dispatch recommended.',
+    imageKeywords: ['photo-1605600659908', 'garbage', 'trash', 'waste', 'dump', 'rubbish', 'litter', 'kuda', 'kachra']
+  },
+  'Broken Streetlight': {
+    category: 'Broken Streetlight',
+    department: 'Public Lighting & Electrical Works',
+    severity: 'HIGH',
+    severityScore: 72,
+    hazards: [
+      'Severe night vehicular visibility reduction & blind spot',
+      'Pedestrian safety & security vulnerability in dark zone',
+      'Potential exposed wiring / short-circuit risk'
+    ],
+    summary: 'Inoperative street luminaire / pole lamp detected creating transit dark zone. LED driver/fixture repair recommended.',
+    imageKeywords: ['photo-1509114397022', 'streetlight', 'street_light', 'pole_light', 'lamp', 'dark_road']
+  },
+  'Open Drain': {
+    category: 'Open Drain',
+    department: 'Water Supply & Sewerage Board',
+    severity: 'CRITICAL',
+    severityScore: 92,
+    hazards: [
+      'Critical pedestrian / child fall and fatal injury hazard',
+      'Untreated sewage backflow & biological pathogen exposure',
+      'Road sub-base erosion & foundation sinkhole risk'
+    ],
+    summary: 'Open uncovered drain chamber & sewer overflow detected posing critical public hazard. Reinforced concrete slab placement required immediately.',
+    imageKeywords: ['photo-1541888946425', 'open_drain', 'sewage', 'manhole', 'gutter', 'drainage']
+  },
+  'Water Leakage': {
+    category: 'Water Leakage',
+    department: 'Water Supply & Sewerage Board',
+    severity: 'HIGH',
+    severityScore: 84,
+    hazards: [
+      'Heavy potable drinking water wastage',
+      'Hydrostatic pressure loss across municipal distribution zone',
+      'Asphalt softening and road pavement subsidence'
+    ],
+    summary: 'High-pressure drinking water main line rupture detected. Sluice valve isolation and clamp weld repair required.',
+    imageKeywords: ['water_leak', 'pipe_burst', 'pipeline_broken', 'drinking_water']
+  },
+  'Damaged Footpath': {
+    category: 'Damaged Footpath',
+    department: 'Road & Highway Infrastructure',
+    severity: 'MEDIUM',
+    severityScore: 65,
+    hazards: [
+      'Pedestrian trip & fall hazard, especially for elderly citizens',
+      'Wheelchair & pram accessibility blockage',
+      'Pedestrians forced onto high-speed vehicular carriageway'
+    ],
+    summary: 'Damaged pedestrian walkway and dislodged paver blocks detected. Interlocking block reset required.',
+    imageKeywords: ['footpath', 'sidewalk', 'paver_block', 'pavement']
+  },
+  'Traffic Signal': {
+    category: 'Traffic Signal',
+    department: 'Traffic & Urban Mobility Command',
+    severity: 'CRITICAL',
+    severityScore: 90,
+    hazards: [
+      'High-speed junction vehicular collision hazard',
+      'Severe intersection traffic gridlock & emergency delay',
+      'Pedestrian crossing vulnerability'
+    ],
+    summary: 'Malfunctioning junction traffic control signal detected. Traffic police manual override & controller card reset required.',
+    imageKeywords: ['traffic_signal', 'signal_light', 'traffic_light', 'junction_signal']
+  },
+  'Illegal Dumping': {
+    category: 'Illegal Dumping',
+    department: 'Solid Waste & Sanitation Management',
+    severity: 'HIGH',
+    severityScore: 76,
+    hazards: [
+      'Construction debris & hazardous sharp objects on road shoulder',
+      'Encroachment on public right-of-way',
+      'Monsoon stormwater runoff contamination'
+    ],
+    summary: 'Illegal construction debris and bulk waste dumping detected. Heavy earthmover clearance and penalty notice recommended.',
+    imageKeywords: ['illegal_dumping', 'construction_debris', 'malba']
+  }
+};
+
+// 1. Fast Heuristic Multilingual Classifier with Human/Invalid Guard & Full Defect Profiles
 export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
-  const lowerText = text.toLowerCase();
+  const lowerText = (text || '').toLowerCase();
   const lowerImg = (imageUrl || '').toLowerCase();
 
   // 1. Strict Human / Non-Civic Detection
   const hasHumanKeyword = HUMAN_OR_INVALID_KEYWORDS.some(kw => lowerText.includes(kw) || lowerImg.includes(kw));
-  const isHumanPreset = lowerImg.includes('photo-1534528741775') || lowerImg.includes('photo-1507003211169') || lowerImg.includes('portrait');
+  const isHumanPreset = lowerImg.includes('photo-1534528741775') || lowerImg.includes('photo-1507003211169') || lowerImg.includes('portrait') || lowerImg.includes('selfie');
 
   if (hasHumanKeyword || isHumanPreset) {
     return {
@@ -110,8 +231,8 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
       confidence: 99,
       severity: 'LOW',
       severityScore: 0,
-      detectedHazards: ['Invalid civic submission rejected'],
-      detectedSummary: 'Rejected: Human / Non-civic photo detected. Only civic issues are accepted.',
+      detectedHazards: ['Invalid civic submission: human/selfie subject detected and blocked'],
+      detectedSummary: 'Rejected: Human / Non-civic photo detected. Only public civic issues are accepted.',
       departmentRecommended: 'N/A',
       multipleIssuesDetected: false,
       secondaryCategories: [],
@@ -131,7 +252,30 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
     }
   }
 
+  // 3. Match category from image URL, text keywords, and user category
   const detectedCategories = [];
+
+  // Check image presets / keywords first
+  for (const [catName, profile] of Object.entries(CIVIC_DEFECT_PROFILES)) {
+    let imgMatched = false;
+    for (const imgKw of profile.imageKeywords) {
+      if (lowerImg.includes(imgKw)) {
+        imgMatched = true;
+        break;
+      }
+    }
+
+    if (imgMatched) {
+      detectedCategories.push({
+        category: catName,
+        matchStrength: 10,
+        confidence: 97,
+        profile
+      });
+    }
+  }
+
+  // Check text keywords in English, Hindi, Marathi
   for (const [category, langMap] of Object.entries(KEYWORD_MAP)) {
     let matched = false;
     let matchStrength = 0;
@@ -140,24 +284,31 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
       for (const kw of keywords) {
         if (lowerText.includes(kw.toLowerCase())) {
           matched = true;
-          matchStrength += 1;
+          matchStrength += 2;
         }
       }
     }
 
     if (matched) {
-      detectedCategories.push({
-        category,
-        matchStrength,
-        confidence: Math.min(98, 85 + matchStrength * 4)
-      });
+      const existing = detectedCategories.find(d => d.category === category);
+      if (existing) {
+        existing.matchStrength += matchStrength;
+        existing.confidence = Math.min(99, existing.confidence + 2);
+      } else {
+        detectedCategories.push({
+          category,
+          matchStrength,
+          confidence: Math.min(98, 86 + matchStrength * 3),
+          profile: CIVIC_DEFECT_PROFILES[category]
+        });
+      }
     }
   }
 
   detectedCategories.sort((a, b) => b.matchStrength - a.matchStrength);
 
-  let primaryCategory = userCategory || 'Pothole';
-  let confidence = 94;
+  let primaryCategory = 'Pothole';
+  let confidence = 95;
   let isMultiple = false;
   let secondaryCategories = [];
 
@@ -169,14 +320,24 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
       isMultiple = true;
       secondaryCategories = detectedCategories.slice(1).map(d => d.category);
     }
-  } else if (!userCategory && text.length < 5 && !imageUrl) {
+  } else if (userCategory && CIVIC_DEFECT_PROFILES[userCategory]) {
+    primaryCategory = userCategory;
+    confidence = 94;
+  } else if (userCategory) {
+    primaryCategory = userCategory;
+    confidence = 90;
+  } else if (!text && !imageUrl) {
     return {
       isValidCivicDefect: true,
       isHumanOrInvalid: false,
       category: 'Other',
       confidence: 42,
       isLowConfidence: true,
-      message: 'Unable to confidently identify the issue. Please verify or choose category manually.',
+      severity: 'LOW',
+      severityScore: 30,
+      detectedHazards: ['Pending image capture / description input'],
+      detectedSummary: 'Please upload an image or type a description to analyze the civic defect.',
+      departmentRecommended: 'Road & Highway Infrastructure',
       multipleIssuesDetected: false,
       secondaryCategories: [],
       detectedRoad,
@@ -184,15 +345,21 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
     };
   }
 
+  const activeProfile = CIVIC_DEFECT_PROFILES[primaryCategory] || CIVIC_DEFECT_PROFILES.Pothole;
+
   return {
     isValidCivicDefect: true,
     isHumanOrInvalid: false,
     category: primaryCategory,
     confidence,
     isLowConfidence: confidence < 60,
+    severity: activeProfile.severity,
+    severityScore: activeProfile.severityScore,
+    detectedHazards: activeProfile.hazards,
+    detectedSummary: activeProfile.summary,
+    departmentRecommended: activeProfile.department,
     multipleIssuesDetected: isMultiple,
     secondaryCategories,
-    detectedSummary: `AI classified as ${primaryCategory} with ${confidence}% certainty.`,
     detectedRoad,
     detectedWardId
   };
@@ -200,7 +367,7 @@ export function classifyIssue(text = '', imageUrl = '', userCategory = null) {
 
 // 2. Google Gemini Real AI Classifier (Multimodal & Multilingual)
 export async function classifyIssueWithGemini(text = '', imageUrl = '', userCategory = null) {
-  // Pre-check heuristic for instant human rejection
+  // Pre-check heuristic for instant human rejection or preset identification
   const heuristic = classifyIssue(text, imageUrl, userCategory);
   if (heuristic.isHumanOrInvalid) {
     return { ...heuristic, isGeminiPowered: false };
@@ -214,7 +381,7 @@ export async function classifyIssueWithGemini(text = '', imageUrl = '', userCate
     const promptText = `You are the CivicLens Municipal AI Vision & Classification Engine for Nagpur Municipal Corporation (NMC).
 CRITICAL RULES:
 1. STRICT HUMAN / NON-CIVIC REJECTION: If this image/text is a person, selfie, face, portrait, human body, animal, food, vehicle selfie, or non-civic object, you MUST set "isValidCivicDefect": false, "isHumanOrInvalid": true, and provide a clear "rejectionReason".
-2. VALID CIVIC ISSUES: Only accept civic issues like Pothole, Road Damage, Garbage Dump, Broken Streetlight, Water Leakage, Open Drain / Sewage, Damaged Footpath, Traffic Signal, Illegal Dumping.
+2. VALID CIVIC ISSUES: Only accept civic issues like Pothole, Road Damage, Garbage, Broken Streetlight, Water Leakage, Open Drain, Damaged Footpath, Traffic Signal, Illegal Dumping.
 
 Citizen Description: "${text}"
 ${userCategory ? `User selected category: "${userCategory}"` : ''}
@@ -224,13 +391,13 @@ Respond with a valid JSON object ONLY:
   "isValidCivicDefect": true,
   "isHumanOrInvalid": false,
   "rejectionReason": "",
-  "category": "Pothole",
+  "category": "Pothole" | "Garbage" | "Broken Streetlight" | "Open Drain" | "Water Leakage" | "Damaged Footpath" | "Traffic Signal" | "Illegal Dumping",
   "confidence": 96,
   "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
   "severityScore": 85,
-  "detectedHazards": ["Hazard description"],
+  "detectedHazards": ["Hazard 1", "Hazard 2"],
   "summary": "1-sentence concise civic summary",
-  "departmentRecommended": "Road & Highway Infrastructure",
+  "departmentRecommended": "Road & Highway Infrastructure" | "Solid Waste & Sanitation Management" | "Public Lighting & Electrical Works" | "Water Supply & Sewerage Board" | "Traffic & Urban Mobility Command",
   "detectedRoad": "Extracted Nagpur Road/Landmark or null",
   "detectedWardId": "ward_12" | "ward_8" | "ward_7" | "ward_5" | null,
   "multipleIssuesDetected": false,
@@ -253,7 +420,7 @@ Respond with a valid JSON object ONLY:
     }
 
     const response = await genAI.models.generateContent({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-2.5-flash',
       contents: contentParts
     });
 
@@ -288,24 +455,27 @@ Respond with a valid JSON object ONLY:
       };
     }
 
+    const matchedCategory = result.category || heuristic.category || userCategory || 'Pothole';
+    const profile = CIVIC_DEFECT_PROFILES[matchedCategory] || CIVIC_DEFECT_PROFILES.Pothole;
+
     return {
       isValidCivicDefect: true,
       isHumanOrInvalid: false,
-      category: result.category || userCategory || heuristic.category || 'Pothole',
-      confidence: result.confidence || 95,
-      severity: result.severity || 'MEDIUM',
-      severityScore: result.severityScore || 70,
-      detectedHazards: result.detectedHazards || [],
-      detectedSummary: result.summary || `AI classified as ${result.category || userCategory || 'Pothole'}.`,
-      departmentRecommended: result.departmentRecommended || 'Road & Highway Infrastructure',
+      category: matchedCategory,
+      confidence: result.confidence || heuristic.confidence || 95,
+      severity: result.severity || profile.severity || 'HIGH',
+      severityScore: result.severityScore || profile.severityScore || 80,
+      detectedHazards: result.detectedHazards && result.detectedHazards.length > 0 ? result.detectedHazards : profile.hazards,
+      detectedSummary: result.summary || profile.summary,
+      departmentRecommended: result.departmentRecommended || profile.department,
       detectedRoad: result.detectedRoad || heuristic.detectedRoad,
       detectedWardId: result.detectedWardId || heuristic.detectedWardId,
-      multipleIssuesDetected: Boolean(result.multipleIssuesDetected),
-      secondaryCategories: result.secondaryCategories || [],
+      multipleIssuesDetected: Boolean(result.multipleIssuesDetected || heuristic.multipleIssuesDetected),
+      secondaryCategories: result.secondaryCategories || heuristic.secondaryCategories || [],
       isGeminiPowered: true
     };
   } catch (err) {
-    console.warn('⚠️ Gemini AI classification fallback to heuristic:', err.message);
+    console.warn('⚠️ Gemini AI classification fallback to enhanced heuristic:', err.message);
     const fallback = classifyIssue(text, imageUrl, userCategory);
     return { ...fallback, isGeminiPowered: false };
   }

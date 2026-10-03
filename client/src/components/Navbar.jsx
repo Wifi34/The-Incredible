@@ -49,9 +49,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                 <span className="font-extrabold text-xl tracking-tight text-slate-900">
                   CivicLens
                 </span>
-                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
-                  AI v2.6
-                </span>
+
               </div>
               <p className="text-[10px] text-slate-500 font-medium tracking-wide">
                 Smart Civic Issue & Authority Engine
@@ -64,11 +62,10 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
             {/* Public Tab */}
             <button
               onClick={() => setCurrentTab('landing')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                currentTab === 'landing'
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentTab === 'landing'
                   ? 'bg-slate-100 text-blue-700 border border-slate-200 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               Overview & Live Map
             </button>
@@ -78,21 +75,19 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               <>
                 <button
                   onClick={() => setCurrentTab('citizen_dashboard')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    currentTab === 'citizen_dashboard'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentTab === 'citizen_dashboard'
                       ? 'bg-slate-100 text-blue-700 border border-slate-200 shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   My Dashboard
                 </button>
                 <button
                   onClick={() => setCurrentTab('report_issue')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                    currentTab === 'report_issue'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${currentTab === 'report_issue'
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                       : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'
-                  }`}
+                    }`}
                 >
                   <FilePlus className="w-3.5 h-3.5" />
                   Report Problem
@@ -104,11 +99,10 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               <>
                 <button
                   onClick={() => setCurrentTab('authority_dashboard')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    currentTab === 'authority_dashboard'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentTab === 'authority_dashboard'
                       ? 'bg-amber-50 text-amber-800 border border-amber-200 shadow-xs font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   Priority Queue & Roads
                 </button>
@@ -119,11 +113,10 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               <>
                 <button
                   onClick={() => setCurrentTab('admin_dashboard')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    currentTab === 'admin_dashboard'
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${currentTab === 'admin_dashboard'
                       ? 'bg-purple-50 text-purple-800 border border-purple-200 shadow-xs font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   Work Monitoring Center
                 </button>
