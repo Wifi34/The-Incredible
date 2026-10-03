@@ -36,9 +36,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const [analyzing, setAnalyzing] = useState(false);
   const [showPresets, setShowPresets] = useState(true); // Toggle sample preset cards
   const [rewardModal, setRewardModal] = useState(null); // Reward modal after submission
-  const [countdown, setCountdown] = useState(3); // 3-second coin showcase timer
+  const [submittedComplaint, setSubmittedComplaint] = useState(null);
+  const [countdown, setCountdown] = useState(4); // 4-second coin showcase timer
 
-  // 3-second countdown timer for coin showcase & auto-store in Civic Karma Wallet
+  // 4-second countdown timer for coin showcase & auto-store in Civic Karma Wallet
   useEffect(() => {
     let timer;
     let interval;
@@ -49,15 +50,20 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       }, 1000);
 
       timer = setTimeout(() => {
+        const comp = submittedComplaint;
         setRewardModal(null);
-        setCurrentTab('citizen_dashboard');
+        if (onComplaintSubmitted && comp) {
+          onComplaintSubmitted(comp);
+        } else {
+          setCurrentTab('citizen_dashboard');
+        }
       }, 4000);
     }
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [rewardModal]);
+  }, [rewardModal, submittedComplaint]);
 
   // Live Camera states & refs
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -280,15 +286,15 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         return;
       }
 
-      if (onComplaintSubmitted) onComplaintSubmitted(data.complaint);
+      setSubmittedComplaint(data.complaint);
 
       if (data.reward) {
         updateCoins(data.reward.totalCoins);
         setRewardModal(data.reward);
-        // Center modal pops up with full celebration and rupees conversion
+        // Central middle celebratory popup opens and stays visible for citizen to see their coins & rupee value!
       } else {
+        if (onComplaintSubmitted) onComplaintSubmitted(data.complaint);
         showToast(data.message || 'Complaint submitted successfully!', 'success');
-        setCurrentTab('citizen_dashboard');
       }
     } catch (err) {
       showToast('Error submitting complaint', 'error');
@@ -835,7 +841,36 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             </div>
 
             {/* Direct Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="space-y-2 pt-1">
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const comp = submittedComplaint;
+                    setRewardModal(null);
+                    if (onComplaintSubmitted && comp) {
+                      onComplaintSubmitted(comp);
+                    } else {
+                      setCurrentTab('citizen_dashboard');
+                    }
+                  }}
+                  className="py-3 px-3 rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-black border border-blue-200 transition-all flex items-center justify-center gap-1"
+                >
+                  <span>Track Status #{submittedComplaint?.id || ''} ➔</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRewardModal(null);
+                    setCurrentTab('citizen_dashboard');
+                  }}
+                  className="py-3 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white text-xs font-black shadow-md shadow-amber-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1"
+                >
+                  <span>Civic Wallet (₹{((rewardModal.totalCoins / 200) * 5).toFixed(2)}) ➔</span>
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => {
@@ -844,20 +879,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
                   setImageUrl('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80');
                   setImageSource('preset');
                 }}
-                className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all text-center"
               >
-                <span>Report Another</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setRewardModal(null);
-                  setCurrentTab('citizen_dashboard');
-                }}
-                className="py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-600/25 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
-              >
-                <span>Open Wallet (₹{((rewardModal.totalCoins / 200) * 5).toFixed(2)}) ➔</span>
+                <span>+ Report Another Issue</span>
               </button>
             </div>
           </div>
