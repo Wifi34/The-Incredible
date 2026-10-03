@@ -248,7 +248,7 @@ class Database {
         city: 'Pune',
         wardId: 'ward_12',
         departmentId: 'dept_roads',
-        designation: 'Municipal Commissioner & CivicSense Director',
+        designation: 'Municipal Commissioner & CivicLens Director',
         badgeNumber: 'ADMIN-HQ-001',
         avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
         createdAt: '2026-07-01T08:00:00.000Z'
@@ -930,7 +930,7 @@ class Database {
         masterIssueId: 'R1028',
         timestamp: '2026-10-02T10:21:00.000Z',
         action: 'AI_CLASSIFIED',
-        actor: 'CivicSense AI Engine',
+        actor: 'CivicLens AI Engine',
         details: 'Classified as Pothole (Confidence: 94%). Priority calculated at 92/100.'
       },
       {
@@ -1073,7 +1073,7 @@ class Database {
       {
         id: 'log_2',
         userId: 'system_ai',
-        userName: 'CivicSense AI Hub',
+        userName: 'CivicLens AI Hub',
         userRole: 'SYSTEM',
         action: 'AI_AGGREGATION',
         targetType: 'MASTER_ISSUE',
@@ -1122,7 +1122,7 @@ class Database {
         citizenId: 'usr_citizen_2',
         citizenName: 'Priya Patil',
         rating: 5,
-        comment: 'Problem was fixed properly and road is completely smooth now. Thank you PMC & CivicSense!',
+        comment: 'Problem was fixed properly and road is completely smooth now. Thank you PMC & CivicLens!',
         category: 'Pothole',
         roadName: 'University Road',
         createdAt: '2026-09-28T14:30:00.000Z'

@@ -47,7 +47,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-xl tracking-tight text-slate-900">
-                  CivicSense
+                  CivicLens
                 </span>
                 <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-bold">
                   AI v2.6

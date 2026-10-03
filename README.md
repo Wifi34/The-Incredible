@@ -1,4 +1,4 @@
-﻿# CivicSense — AI-Powered Civic Issue Reporting & Management Platform
+# CivicLens — AI-Powered Civic Issue Reporting & Management Platform
 
 ## Quick Start Guide
 

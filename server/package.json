@@ -1,7 +1,7 @@
 {
-  "name": "civicsense-server",
+  "name": "civiclens-server",
   "version": "1.0.0",
-  "description": "CivicSense Backend API - AI-Powered Civic Issue Platform",
+  "description": "CivicLens Backend API - AI-Powered Civic Issue Platform",
   "main": "index.js",
   "type": "module",
   "scripts": {

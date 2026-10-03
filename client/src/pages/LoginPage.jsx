@@ -44,7 +44,7 @@ export function LoginPage({ setCurrentTab }) {
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center mx-auto shadow-md shadow-blue-500/20">
           <ShieldAlert className="w-6 h-6 text-white" />
         </div>
-        <h2 className="text-2xl font-black text-slate-900">Sign In to CivicSense</h2>
+        <h2 className="text-2xl font-black text-slate-900">Sign In to CivicLens</h2>
         <p className="text-xs text-slate-500">
           Access your role-specific dashboard (Citizen, Authority, or Administrator)
         </p>

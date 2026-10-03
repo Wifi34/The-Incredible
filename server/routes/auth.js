@@ -69,7 +69,7 @@ router.post('/register', async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Citizen registration successful! Welcome to CivicSense.',
+      message: 'Citizen registration successful! Welcome to CivicLens.',
       token,
       user: safeUser
     });
@@ -120,7 +120,7 @@ router.post('/login', async (req, res) => {
       action: 'USER_LOGIN',
       targetType: 'USER',
       targetId: user.id,
-      details: `${user.role} ${user.name} logged into CivicSense platform.`
+      details: `${user.role} ${user.name} logged into CivicLens platform.`
     });
 
     const { passwordHash: _, ...safeUser } = user;

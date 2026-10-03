@@ -421,7 +421,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           Report a Public Civic Issue
         </h2>
         <p className="text-xs sm:text-sm text-slate-500">
-          Capture a photo directly with your camera or select from your gallery. CivicSense AI with Gemini classifies and routes automatically.
+          Capture a photo directly with your camera or select from your gallery. CivicLens AI with Gemini classifies and routes automatically.
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-// CivicSense AI Engine - Intelligent Classification, Severity, Spatial Duplicate Clustering & Verification
+// CivicLens AI Engine - Intelligent Classification, Severity, Spatial Duplicate Clustering & Verification
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -147,7 +147,7 @@ export async function classifyIssueWithGemini(text = '', imageUrl = '', userCate
   }
 
   try {
-    const prompt = `You are the CivicSense Municipal AI Intelligence Engine for Pune Municipal Corporation.
+    const prompt = `You are the CivicLens Municipal AI Intelligence Engine for Pune Municipal Corporation.
 Analyze this civic issue report submitted by a citizen in English, Hindi, Marathi, or Hinglish:
 Description: "${text}"
 ${userCategory ? `User selected category: "${userCategory}"` : ''}

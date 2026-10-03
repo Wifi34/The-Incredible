@@ -107,7 +107,7 @@ router.post('/step', (req, res) => {
 router.post('/reset', (req, res) => {
   try {
     db.init();
-    res.json({ success: true, message: 'CivicSense demo state successfully reset to default!' });
+    res.json({ success: true, message: 'CivicLens demo state successfully reset to default!' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Reset failed', error: err.message });
   }

@@ -120,7 +120,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem('civicsense_token', data.token);
       setToken(data.token);
       setUser(data.user);
-      showToast('Registration successful! Welcome to CivicSense.', 'success');
+      showToast('Registration successful! Welcome to CivicLens.', 'success');
       return { success: true, user: data.user };
     } catch (err) {
       showToast('Registration error: ' + err.message, 'error');

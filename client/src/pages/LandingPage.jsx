@@ -54,7 +54,7 @@ export function LandingPage({ setCurrentTab, onOpenDemo }) {
           </h1>
 
           <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
-            CivicSense empowers citizens with instant AI image classification, spatial duplicate clustering, automated municipal authority dispatch, real-time 0–100% work progress tracking, and mandatory citizen resolution verification.
+            CivicLens empowers citizens with instant AI image classification, spatial duplicate clustering, automated municipal authority dispatch, real-time 0–100% work progress tracking, and mandatory citizen resolution verification.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">

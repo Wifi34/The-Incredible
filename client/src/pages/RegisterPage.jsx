@@ -71,7 +71,7 @@ export function RegisterPage({ setCurrentTab }) {
         </div>
         <h2 className="text-2xl font-black text-slate-900">Citizen Registration</h2>
         <p className="text-xs text-slate-500">
-          Join CivicSense to report civic hazards, track road repairs, and earn Civic Karma rewards.
+          Join CivicLens to report civic hazards, track road repairs, and earn Civic Karma rewards.
         </p>
       </div>
 

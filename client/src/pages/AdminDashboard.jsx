@@ -142,7 +142,7 @@ export function AdminDashboard({ setCurrentTab }) {
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            CivicSense City-Wide Work Monitoring Center
+            CivicLens City-Wide Work Monitoring Center
           </h2>
           <p className="text-xs sm:text-sm text-slate-500">
             Real-time oversight of all 4 municipal wards, field maintenance teams, active SLA breaches, and officer KPIs.

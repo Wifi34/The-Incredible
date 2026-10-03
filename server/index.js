@@ -38,7 +38,7 @@ app.use('/api/demo', demoRoutes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ONLINE',
-    service: 'CivicSense Backend API',
+    service: 'CivicLens Backend API',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });
@@ -61,7 +61,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`=======================================================`);
-  console.log(`🚀 CivicSense AI Civic Platform Server running on port ${PORT}`);
+  console.log(`🚀 CivicLens AI Civic Platform Server running on port ${PORT}`);
   console.log(`📡 API Base: http://localhost:${PORT}/api`);
   console.log(`🔒 Authentication & Role-based Authorization active`);
   console.log(`🧠 AI Classification & Spatial Clustering Hub initialized`);

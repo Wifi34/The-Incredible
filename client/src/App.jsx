@@ -96,7 +96,7 @@ function MainApp() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <span className="font-extrabold text-slate-900">CivicSense</span>
+          <span className="font-extrabold text-slate-900">CivicLens</span>
           <span>•</span>
           <span>AI-Powered Smart Civic Issue Reporting, Tracking & Authority Management</span>
         </div>

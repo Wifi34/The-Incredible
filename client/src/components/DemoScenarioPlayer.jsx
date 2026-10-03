@@ -74,7 +74,7 @@ export function DemoScenarioPlayer({ isOpen, onClose, onStepChange }) {
       title: 'Resolution Submitted & AI Verification (96%)',
       actor: 'AUTHORITY & AI ENGINE',
       description: 'Work 100% complete. Authority uploads post-repair photo for quality audit.',
-      action: 'CivicSense AI Computer Vision analyzes before/after photos and verifies resolution at 96% confidence. Citizen verification requested.',
+      action: 'CivicLens AI Computer Vision analyzes before/after photos and verifies resolution at 96% confidence. Citizen verification requested.',
       badge: 'AI Verified (96%)',
       badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
     },
