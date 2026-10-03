@@ -116,3 +116,48 @@
   margin: 12px 14px !important;
   font-family: var(--font-sans) !important;
 }
+
+/* Coin floating burst animation for rewards */
+@keyframes coinFloatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(60px) scale(0.6) rotate(-10deg);
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-90px) scale(1.15) rotate(20deg);
+  }
+}
+
+.animate-coin-float {
+  animation: coinFloatUp 2.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes coinSpinGlow {
+  0% {
+    transform: scale(0.2) rotate(-25deg);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1.18) rotate(8deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(0.95) rotate(-3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-coin-pop {
+  animation: coinSpinGlow 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

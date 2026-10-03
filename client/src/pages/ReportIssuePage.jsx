@@ -34,8 +34,32 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
   const [loading, setLoading] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [showPresets, setShowPresets] = useState(false);
   const [rewardModal, setRewardModal] = useState(null); // Reward modal after submission
+  const [countdown, setCountdown] = useState(3); // 3-second coin showcase timer
+
+  // 3-second countdown timer for coin showcase & auto-store in Civic Karma Wallet
+  useEffect(() => {
+    let timer;
+    let interval;
+    if (rewardModal) {
+      setCountdown(3);
+      interval = setInterval(() => {
+        setCountdown(prev => (prev > 1 ? prev - 1 : 1));
+      }, 1000);
+
+      timer = setTimeout(() => {
+        const totalCoins = rewardModal.totalCoins;
+        const earned = rewardModal.coinsEarned;
+        setRewardModal(null);
+        setCurrentTab('citizen_dashboard');
+        showToast(`🪙 +${earned} Coins stored in your Civic Karma Wallet!`, 'success');
+      }, 3000);
+    }
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [rewardModal]);
 
   // Live Camera states & refs
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -699,29 +723,59 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         </div>
       </form>
 
-      {/* 🎉 Celebratory Credit Coins Reward Modal */}
+      {/* 🎉 Full-Screen 3-Second Celebratory Coin Shower & Wallet Storage Overlay */}
       {rewardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4 animate-fadeIn">
-          <div className="bg-white border border-amber-200 rounded-3xl max-w-md w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-lg p-4 animate-fadeIn overflow-hidden">
+          {/* Floating Golden Coin Particles across the screen */}
+          {[...Array(14)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-coin-float pointer-events-none select-none text-2xl sm:text-3xl"
+              style={{
+                left: `${(i * 7.1) + 2}%`,
+                bottom: `${5 + (i % 4) * 12}%`,
+                animationDelay: `${i * 0.12}s`,
+                animationDuration: `${2.4 + (i % 3) * 0.3}s`
+              }}
+            >
+              🪙
+            </div>
+          ))}
+
+          <div className="bg-white border-2 border-amber-300 rounded-3xl max-w-md w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden animate-coin-pop z-10">
             {/* Glowing background halo */}
-            <div className="absolute -top-24 -right-24 w-60 h-60 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -right-24 w-60 h-60 bg-amber-400/25 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
 
             {/* Big Animated Coin Icon */}
-            <div className="relative mx-auto w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 flex items-center justify-center shadow-xl shadow-amber-500/30 border-4 border-white animate-bounce">
-              <span className="text-4xl select-none">🪙</span>
+            <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 flex items-center justify-center shadow-2xl shadow-amber-500/40 border-4 border-white animate-bounce">
+              <span className="text-5xl select-none">🪙</span>
             </div>
 
             <div className="space-y-1.5">
-              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-black uppercase tracking-wider border border-amber-300">
+              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-950 text-[11px] font-black uppercase tracking-wider border border-amber-300">
                 Civic Karma Awarded!
               </span>
-              <h3 className="text-2xl font-black text-slate-900">
+              <h3 className="text-3xl font-black text-slate-900">
                 +{rewardModal.coinsEarned} Civic Coins
               </h3>
-              <p className="text-xs text-slate-600">
-                Thank you for being an active citizen and helping keep Pune clean and safe!
+              <p className="text-xs text-slate-600 font-medium">
+                Storing into your <strong>Civic Karma Wallet</strong> in <span className="text-amber-800 font-black text-sm">{countdown}s</span>...
               </p>
+            </div>
+
+            {/* 3-Second Animated Auto-Store Progress Bar */}
+            <div className="space-y-1">
+              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                <div
+                  className="bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-linear shadow-sm"
+                  style={{ width: `${((4 - countdown) / 3) * 100}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                <span>Credited</span>
+                <span>Redirecting to Wallet ({countdown}s)</span>
+              </div>
             </div>
 
             {/* Coins Breakdown Box */}
@@ -748,33 +802,18 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] text-blue-900 leading-relaxed font-medium">
-              💡 <strong>Civic Perks:</strong> Redeem coins on your Citizen Dashboard for Pune Metro passes, municipal property tax rebates, and verified badge certificates.
-            </div>
-
-            {/* Modal Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setRewardModal(null);
-                  setDescription('');
-                  setImageUrl('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80');
-                  setAiAnalysis(null);
-                }}
-                className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all"
-              >
-                Report Another Issue
-              </button>
+            {/* Instant Skip / Direct Action Buttons */}
+            <div className="pt-2">
               <button
                 type="button"
                 onClick={() => {
                   setRewardModal(null);
                   setCurrentTab('citizen_dashboard');
+                  showToast(`🪙 +${rewardModal.coinsEarned} Coins stored in your Civic Karma Wallet!`, 'success');
                 }}
-                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-md shadow-blue-600/25 transition-all"
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-600/25 transition-all hover:scale-102 flex items-center justify-center gap-2"
               >
-                View Dashboard ➔
+                <span>View Civic Karma Wallet Now ➔</span>
               </button>
             </div>
           </div>
