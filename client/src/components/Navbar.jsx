@@ -200,6 +200,27 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                       <div className="text-[10px] text-slate-500">Chief Municipal Director</div>
                     </div>
                   </button>
+
+                  <div className="pt-1.5 mt-1.5 border-t border-slate-100 flex flex-col gap-1">
+                    <button
+                      onClick={() => {
+                        setCurrentTab('login');
+                        setShowRoleMenu(false);
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-slate-50 text-slate-700 font-semibold"
+                    >
+                      🔑 Sign In with Credentials
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentTab('register');
+                        setShowRoleMenu(false);
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs hover:bg-slate-50 text-slate-700 font-semibold"
+                    >
+                      📝 Register New Account
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -230,7 +251,10 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
                   <div className="text-[10px] text-slate-500">{user.city || 'Pune'}</div>
                 </div>
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    setCurrentTab('login');
+                  }}
                   title="Logout"
                   className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                 >
@@ -241,13 +265,13 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentTab('login')}
-                  className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600"
+                  className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition-colors"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => setCurrentTab('register')}
-                  className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs"
+                  className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-xs transition-colors"
                 >
                   Register
                 </button>
@@ -275,7 +299,7 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-slate-200 bg-white p-4 space-y-3 shadow-lg">
+        <div className="md:hidden border-b border-slate-200 bg-white p-4 space-y-3 shadow-lg animate-fadeIn">
           <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <span className="text-xs text-slate-500">Current Role:</span>
             <span className={`px-2 py-0.5 rounded text-xs font-bold border ${getRoleBadgeColor()}`}>{role}</span>
@@ -365,6 +389,39 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
               Admin Work Monitoring Center
             </button>
           )}
+
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <button
+              onClick={() => {
+                setCurrentTab('login');
+                setMobileMenuOpen(false);
+              }}
+              className="text-xs font-bold text-blue-600 hover:underline"
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => {
+                setCurrentTab('register');
+                setMobileMenuOpen(false);
+              }}
+              className="text-xs font-bold text-cyan-600 hover:underline"
+            >
+              Register Citizen
+            </button>
+            {user && (
+              <button
+                onClick={() => {
+                  logout();
+                  setCurrentTab('login');
+                  setMobileMenuOpen(false);
+                }}
+                className="text-xs font-bold text-rose-600 hover:underline"
+              >
+                Sign Out
+              </button>
+            )}
+          </div>
         </div>
       )}
     </nav>

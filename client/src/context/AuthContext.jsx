@@ -20,8 +20,16 @@ export function AuthProvider({ children }) {
   // Fetch current user on mount or token change
   useEffect(() => {
     const fetchMe = async () => {
+      const isExplicitlyLoggedOut = localStorage.getItem('civicsense_logged_out') === 'true';
+
       if (!token) {
-        // Auto-authenticate default demo citizen session for seamless instant access
+        if (isExplicitlyLoggedOut) {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        // First visit auto-session for instant guest exploration
         try {
           const res = await fetch('/api/auth/login', {
             method: 'POST',
@@ -37,21 +45,10 @@ export function AuthProvider({ children }) {
             return;
           }
         } catch (e) {
-          console.warn('Auto demo login fallback:', e);
+          console.warn('Initial demo session note:', e);
         }
 
-        // Fallback guest session
-        setUser({
-          id: 'usr_citizen_1',
-          name: 'Rahul Sharma',
-          email: 'citizen@civicsense.gov',
-          role: 'CITIZEN',
-          phone: '+91 98765 43210',
-          wardId: 'ward_12',
-          city: 'Pune',
-          coins: 250,
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
-        });
+        setUser(null);
         setLoading(false);
         return;
       }
@@ -61,14 +58,16 @@ export function AuthProvider({ children }) {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
-        if (data.success) {
+        if (data.success && data.user) {
           setUser(data.user);
         } else {
           localStorage.removeItem('civicsense_token');
           setToken(null);
+          setUser(null);
         }
       } catch (err) {
         console.error('Session restore error:', err);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -83,22 +82,23 @@ export function AuthProvider({ children }) {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: email.trim(), password })
       });
       const data = await res.json();
       if (!data.success) {
-        showToast(data.message || 'Login failed', 'error');
-        return { success: false, message: data.message };
+        showToast(data.message || 'Login failed. Please check your credentials.', 'error');
+        return { success: false, message: data.message || 'Invalid email or password' };
       }
 
+      localStorage.removeItem('civicsense_logged_out');
       localStorage.setItem('civicsense_token', data.token);
       setToken(data.token);
       setUser(data.user);
       showToast(`Welcome back, ${data.user.name}! (${data.user.role})`, 'success');
       return { success: true, user: data.user };
     } catch (err) {
-      showToast('Login network error', 'error');
-      return { success: false, message: err.message };
+      showToast('Login network error: ' + err.message, 'error');
+      return { success: false, message: 'Server connection error. Please try again.' };
     }
   };
 
@@ -113,22 +113,24 @@ export function AuthProvider({ children }) {
       const data = await res.json();
       if (!data.success) {
         showToast(data.message || 'Registration failed', 'error');
-        return { success: false, message: data.message };
+        return { success: false, message: data.message || 'Registration failed' };
       }
 
+      localStorage.removeItem('civicsense_logged_out');
       localStorage.setItem('civicsense_token', data.token);
       setToken(data.token);
       setUser(data.user);
       showToast('Registration successful! Welcome to CivicSense.', 'success');
       return { success: true, user: data.user };
     } catch (err) {
-      showToast('Registration error', 'error');
-      return { success: false, message: err.message };
+      showToast('Registration error: ' + err.message, 'error');
+      return { success: false, message: 'Server connection error. Please try again.' };
     }
   };
 
   // Logout handler
   const logout = () => {
+    localStorage.setItem('civicsense_logged_out', 'true');
     localStorage.removeItem('civicsense_token');
     setToken(null);
     setUser(null);
@@ -137,12 +139,13 @@ export function AuthProvider({ children }) {
 
   // Quick Role Switcher for instant testing & demo presentations
   const switchRole = async (targetRole) => {
+    localStorage.removeItem('civicsense_logged_out');
     if (targetRole === 'CITIZEN') {
-      await login('citizen@civicsense.gov', 'Citizen@123');
+      return await login('citizen@civicsense.gov', 'Citizen@123');
     } else if (targetRole === 'AUTHORITY') {
-      await login('authority.roads@civicsense.gov', 'Authority@123');
+      return await login('authority.roads@civicsense.gov', 'Authority@123');
     } else if (targetRole === 'ADMIN') {
-      await login('admin@civicsense.gov', 'Admin@123');
+      return await login('admin@civicsense.gov', 'Admin@123');
     }
   };
 

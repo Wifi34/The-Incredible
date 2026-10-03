@@ -11,11 +11,13 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, phone, password, confirmPassword, address, city, wardId, avatar } = req.body;
 
-    if (!name || !email || !password || !phone) {
-      return res.status(400).json({ success: false, message: 'Please provide all required fields (Name, Email, Phone, Password)' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields (Name, Email, Password)' });
     }
 
-    if (password !== confirmPassword) {
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (confirmPassword && password !== confirmPassword) {
       return res.status(400).json({ success: false, message: 'Passwords do not match' });
     }
 
@@ -23,23 +25,24 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Password must be at least 6 characters long' });
     }
 
-    const existingUser = db.findUserByEmail(email);
+    const existingUser = db.findUserByEmail(cleanEmail);
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'An account with this email address already exists' });
+      return res.status(400).json({ success: false, message: 'An account with this email address already exists. Please log in.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
     // Enforce CITIZEN role strictly for public registration
     const newUser = db.addUser({
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: cleanEmail,
+      phone: (phone || '+91 98765 00000').trim(),
       passwordHash,
       role: 'CITIZEN',
-      address: address || '',
+      address: address ? address.trim() : '',
       city: city || 'Pune',
       wardId: wardId || 'ward_12',
+      coins: 50,
       avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
     });
 
@@ -61,6 +64,8 @@ router.post('/register', async (req, res) => {
     });
 
     const { passwordHash: _, ...safeUser } = newUser;
+    safeUser.coins = safeUser.coins || 50;
+    safeUser.convertedRupees = Math.floor((safeUser.coins / 200) * 5);
 
     return res.status(201).json({
       success: true,
@@ -69,7 +74,8 @@ router.post('/register', async (req, res) => {
       user: safeUser
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Registration failed', error: err.message });
+    console.error('Registration server error:', err);
+    return res.status(500).json({ success: false, message: 'Registration failed: ' + err.message, error: err.message });
   }
 });
 
@@ -79,17 +85,25 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Please provide email and password' });
+      return res.status(400).json({ success: false, message: 'Please enter both email and password' });
     }
 
-    const user = db.findUserByEmail(email);
+    const cleanEmail = email.trim().toLowerCase();
+    const user = db.findUserByEmail(cleanEmail);
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials. No user found with this email.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    let isMatch = false;
+    if (user.passwordHash) {
+      isMatch = await bcrypt.compare(password, user.passwordHash);
+    }
+    if (!isMatch && user.password) {
+      isMatch = (password === user.password);
+    }
+
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid password. Please check your credentials.' });
     }
 
     const token = jwt.sign(
@@ -110,6 +124,8 @@ router.post('/login', async (req, res) => {
     });
 
     const { passwordHash: _, ...safeUser } = user;
+    safeUser.coins = safeUser.coins || 0;
+    safeUser.convertedRupees = Math.floor((safeUser.coins / 200) * 5);
 
     return res.json({
       success: true,
@@ -118,13 +134,16 @@ router.post('/login', async (req, res) => {
       user: safeUser
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: 'Login failed', error: err.message });
+    console.error('Login server error:', err);
+    return res.status(500).json({ success: false, message: 'Login failed: ' + err.message, error: err.message });
   }
 });
 
 // 3. Current User
 router.get('/me', authenticateToken, (req, res) => {
   const { passwordHash: _, ...safeUser } = req.user;
+  safeUser.coins = safeUser.coins || 0;
+  safeUser.convertedRupees = Math.floor((safeUser.coins / 200) * 5);
   res.json({ success: true, user: safeUser });
 });
 

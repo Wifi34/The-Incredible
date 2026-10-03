@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, UserPlus, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, UserPlus, CheckCircle2, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function RegisterPage({ setCurrentTab }) {
@@ -9,10 +9,12 @@ export function RegisterPage({ setCurrentTab }) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('Pune');
   const [wardId, setWardId] = useState('ward_12');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Password strength calculation
   const getPasswordStrength = () => {
@@ -27,20 +29,35 @@ export function RegisterPage({ setCurrentTab }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    if (password !== confirmPassword) {
+      setErrorMessage('Passwords do not match. Please re-enter.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setErrorMessage('Password must be at least 6 characters long.');
+      return;
+    }
+
     setLoading(true);
     const res = await register({
-      name,
-      email,
-      phone,
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
       password,
       confirmPassword,
-      address,
+      address: address.trim(),
       city,
       wardId
     });
     setLoading(false);
+
     if (res.success) {
       setCurrentTab('citizen_dashboard');
+    } else {
+      setErrorMessage(res.message || 'Registration failed. Please try again.');
     }
   };
 
@@ -54,18 +71,28 @@ export function RegisterPage({ setCurrentTab }) {
         </div>
         <h2 className="text-2xl font-black text-slate-900">Citizen Registration</h2>
         <p className="text-xs text-slate-500">
-          Join CivicSense to report civic hazards, track road repairs, and verify city resolutions.
+          Join CivicSense to report civic hazards, track road repairs, and earn Civic Karma rewards.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/90 shadow-xl space-y-4">
+        {errorMessage && (
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5 animate-fadeIn">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <span className="font-semibold">{errorMessage}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Full Name</label>
+            <label className="text-xs text-slate-700 font-bold block mb-1">Full Name *</label>
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (errorMessage) setErrorMessage('');
+              }}
               placeholder="e.g. Rahul Sharma"
               required
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
@@ -73,11 +100,14 @@ export function RegisterPage({ setCurrentTab }) {
           </div>
 
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Email Address</label>
+            <label className="text-xs text-slate-700 font-bold block mb-1">Email Address *</label>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errorMessage) setErrorMessage('');
+              }}
               placeholder="e.g. rahul@example.com"
               required
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
@@ -87,11 +117,14 @@ export function RegisterPage({ setCurrentTab }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Mobile Number</label>
+            <label className="text-xs text-slate-700 font-bold block mb-1">Mobile Number *</label>
             <input
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                setPhone(e.target.value);
+                if (errorMessage) setErrorMessage('');
+              }}
               placeholder="+91 98765 43210"
               required
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
@@ -99,7 +132,7 @@ export function RegisterPage({ setCurrentTab }) {
           </div>
 
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Residential Ward</label>
+            <label className="text-xs text-slate-700 font-bold block mb-1">Residential Ward *</label>
             <select
               value={wardId}
               onChange={(e) => setWardId(e.target.value)}
@@ -126,22 +159,39 @@ export function RegisterPage({ setCurrentTab }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
-            />
+            <label className="text-xs text-slate-700 font-bold block mb-1">Password (min 6 chars) *</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errorMessage) setErrorMessage('');
+                }}
+                placeholder="••••••••"
+                required
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 pr-10 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div>
-            <label className="text-xs text-slate-700 font-bold block mb-1">Confirm Password</label>
+            <label className="text-xs text-slate-700 font-bold block mb-1">Confirm Password *</label>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (errorMessage) setErrorMessage('');
+              }}
+              placeholder="••••••••"
               required
               className="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-cyan-500 transition-all"
             />
