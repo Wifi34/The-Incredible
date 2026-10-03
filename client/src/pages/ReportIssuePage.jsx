@@ -43,18 +43,15 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     let timer;
     let interval;
     if (rewardModal) {
-      setCountdown(3);
+      setCountdown(4);
       interval = setInterval(() => {
         setCountdown(prev => (prev > 1 ? prev - 1 : 1));
       }, 1000);
 
       timer = setTimeout(() => {
-        const totalCoins = rewardModal.totalCoins;
-        const earned = rewardModal.coinsEarned;
         setRewardModal(null);
         setCurrentTab('citizen_dashboard');
-        showToast(`🪙 +${earned} Coins stored in your Civic Karma Wallet!`, 'success');
-      }, 3000);
+      }, 4000);
     }
     return () => {
       clearTimeout(timer);
@@ -288,9 +285,9 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       if (data.reward) {
         updateCoins(data.reward.totalCoins);
         setRewardModal(data.reward);
-        showToast(`🪙 +${data.reward.coinsEarned} Civic Coins Credited!`, 'success');
+        // Center modal pops up with full celebration and rupees conversion
       } else {
-        showToast(data.message, 'success');
+        showToast(data.message || 'Complaint submitted successfully!', 'success');
         setCurrentTab('citizen_dashboard');
       }
     } catch (err) {
@@ -724,97 +721,140 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
         </div>
       </form>
 
-      {/* 🎉 Full-Screen 3-Second Celebratory Coin Shower & Wallet Storage Overlay */}
+      {/* 🎉 Full-Screen Celebratory Center Modal with Coins & Real Rupees Value (200 Coins = ₹5) */}
       {rewardModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-lg p-4 animate-fadeIn overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fadeIn overflow-hidden">
           {/* Floating Golden Coin Particles across the screen */}
-          {[...Array(14)].map((_, i) => (
+          {[...Array(16)].map((_, i) => (
             <div
               key={i}
               className="absolute animate-coin-float pointer-events-none select-none text-2xl sm:text-3xl"
               style={{
-                left: `${(i * 7.1) + 2}%`,
-                bottom: `${5 + (i % 4) * 12}%`,
-                animationDelay: `${i * 0.12}s`,
-                animationDuration: `${2.4 + (i % 3) * 0.3}s`
+                left: `${(i * 6.2) + 2}%`,
+                bottom: `${4 + (i % 4) * 12}%`,
+                animationDelay: `${i * 0.1}s`,
+                animationDuration: `${2.2 + (i % 3) * 0.3}s`
               }}
             >
               🪙
             </div>
           ))}
 
-          <div className="bg-white border-2 border-amber-300 rounded-3xl max-w-md w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden animate-coin-pop z-10">
+          <div className="bg-white border-2 border-amber-300 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden animate-coin-pop z-10">
             {/* Glowing background halo */}
-            <div className="absolute -top-24 -right-24 w-60 h-60 bg-amber-400/25 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-60 h-60 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-400/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-400/20 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Big Animated Coin Icon */}
+            {/* Big Animated Coin Icon with sparkles */}
             <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 via-amber-300 to-yellow-200 flex items-center justify-center shadow-2xl shadow-amber-500/40 border-4 border-white animate-bounce">
               <span className="text-5xl select-none">🪙</span>
             </div>
 
-            <div className="space-y-1.5">
-              <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-950 text-[11px] font-black uppercase tracking-wider border border-amber-300">
-                Civic Karma Awarded!
-              </span>
-              <h3 className="text-3xl font-black text-slate-900">
-                +{rewardModal.coinsEarned} Civic Coins
+            {/* Center Congratulations Title & Badges */}
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-100 text-amber-950 text-xs font-black uppercase tracking-wider border border-amber-300 shadow-xs">
+                <span>🎉 Congratulations!</span>
+              </div>
+              
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                You Got +{rewardModal.coinsEarned} Civic Karma Coins!
               </h3>
-              <p className="text-xs text-slate-600 font-medium">
-                Storing into your <strong>Civic Karma Wallet</strong> in <span className="text-amber-800 font-black text-sm">{countdown}s</span>...
+              
+              <p className="text-xs sm:text-sm text-slate-600 font-medium">
+                Thank you for being an active responsible citizen and reporting this civic defect.
               </p>
             </div>
 
+            {/* 💎 200 COINS = ₹5 RUPEES PROMINENT VALUE BOX */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-yellow-400/20 to-emerald-500/10 border-2 border-amber-300 text-center space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-xs font-extrabold text-slate-700">Official Conversion Rate:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-amber-400 text-slate-950 font-black text-xs shadow-xs border border-amber-500 flex items-center gap-1">
+                  <span>🪙 200 Coins</span>
+                  <span>=</span>
+                  <span className="text-sm">₹5 Rupees</span>
+                </span>
+              </div>
+              <div className="text-xs font-bold text-slate-700 pt-1 flex items-center justify-center gap-4">
+                <span>This Reward: <strong className="text-emerald-700 font-black text-sm">₹{((rewardModal.coinsEarned / 200) * 5).toFixed(2)}</strong></span>
+                <span className="text-slate-300">•</span>
+                <span>Total Balance: <strong className="text-amber-900 font-black text-sm">₹{((rewardModal.totalCoins / 200) * 5).toFixed(2)}</strong></span>
+              </div>
+            </div>
+
             {/* 3-Second Animated Auto-Store Progress Bar */}
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
                 <div
                   className="bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-linear shadow-sm"
-                  style={{ width: `${((4 - countdown) / 3) * 100}%` }}
+                  style={{ width: `${((5 - countdown) / 4) * 100}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] font-bold text-slate-400">
-                <span>Credited</span>
-                <span>Redirecting to Wallet ({countdown}s)</span>
+              <div className="flex justify-between text-[11px] font-bold text-slate-500">
+                <span className="flex items-center gap-1 text-emerald-600 font-black">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Credited to Account
+                </span>
+                <span>Storing in Civic Karma Wallet in <strong className="text-amber-800 text-xs">{countdown}s</strong>...</span>
               </div>
             </div>
 
             {/* Coins Breakdown Box */}
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2">
-              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200">
-                Reward Breakdown
+              <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200 flex justify-between">
+                <span>Reward Item</span>
+                <span>Coins (Rupees)</span>
               </div>
               {rewardModal.breakdown ? (
                 rewardModal.breakdown.map((item, idx) => (
                   <div key={idx} className="flex justify-between items-center text-xs font-semibold text-slate-700">
                     <span>{item.item}</span>
-                    <span className="text-emerald-600 font-extrabold">+{item.amount} 🪙</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-600 font-black">+{item.amount} 🪙</span>
+                      <span className="text-[10px] text-slate-400">(₹{((item.amount / 200) * 5).toFixed(2)})</span>
+                    </div>
                   </div>
                 ))
               ) : (
                 <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                   <span>Verified Civic Submission</span>
-                  <span className="text-emerald-600 font-extrabold">+{rewardModal.coinsEarned} 🪙</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-emerald-600 font-black">+{rewardModal.coinsEarned} 🪙</span>
+                    <span className="text-[10px] text-slate-400">(₹{((rewardModal.coinsEarned / 200) * 5).toFixed(2)})</span>
+                  </div>
                 </div>
               )}
               <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-black text-slate-900">
                 <span>New Wallet Balance:</span>
-                <span className="text-amber-800 text-sm font-extrabold">🪙 {rewardModal.totalCoins} Coins</span>
+                <span className="text-amber-800 text-sm font-black">
+                  🪙 {rewardModal.totalCoins} Coins (₹{((rewardModal.totalCoins / 200) * 5).toFixed(2)})
+                </span>
               </div>
             </div>
 
-            {/* Instant Skip / Direct Action Buttons */}
-            <div className="pt-2">
+            {/* Direct Action Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setRewardModal(null);
+                  setDescription('');
+                  setImageUrl('https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80');
+                  setImageSource('preset');
+                }}
+                className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+              >
+                <span>Report Another</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
                   setRewardModal(null);
                   setCurrentTab('citizen_dashboard');
-                  showToast(`🪙 +${rewardModal.coinsEarned} Coins stored in your Civic Karma Wallet!`, 'success');
                 }}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-600/25 transition-all hover:scale-102 flex items-center justify-center gap-2"
+                className="py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-blue-600/25 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
               >
-                <span>View Civic Karma Wallet Now ➔</span>
+                <span>Open Wallet (₹{((rewardModal.totalCoins / 200) * 5).toFixed(2)}) ➔</span>
               </button>
             </div>
           </div>

@@ -208,12 +208,12 @@ export function Navbar({ currentTab, setCurrentTab, onOpenDemo }) {
             {role === 'CITIZEN' && user && (
               <button
                 onClick={() => setCurrentTab('citizen_dashboard')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 font-extrabold text-xs shadow-xs transition-all hover:scale-105"
-                title="Your Civic Karma Coins. Earn coins by reporting and verifying civic hazards!"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 border border-amber-300 text-amber-950 font-black text-xs shadow-xs transition-all hover:scale-105"
+                title="Civic Karma Wallet: 200 Coins = ₹5 Rupees Cash/Rebates"
               >
                 <span className="text-sm select-none">🪙</span>
                 <span>{user.coins || 0}</span>
-                <span className="text-[10px] text-amber-700 uppercase font-black tracking-wider">Coins</span>
+                <span className="text-[10px] text-emerald-700 font-extrabold">(₹{(((user.coins || 0) / 200) * 5).toFixed(1)})</span>
               </button>
             )}
 

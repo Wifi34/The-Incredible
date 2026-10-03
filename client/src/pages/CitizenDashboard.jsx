@@ -52,6 +52,8 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
   const reopened = complaints.filter(c => c.status === 'REOPENED').length;
   const pending = complaints.filter(c => c.status === 'REPORTED' || c.status === 'NOT STARTED').length;
 
+  const [verificationReward, setVerificationReward] = useState(null);
+
   const handleVerifySuccess = async (complaintId) => {
     try {
       const res = await fetch(`/api/complaints/${complaintId}/verify-resolution`, {
@@ -66,7 +68,7 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
       if (data.success) {
         if (data.reward) {
           updateCoins(data.reward.totalCoins);
-          showToast(`✅ Resolution verified! 🪙 +${data.reward.coinsEarned} Civic Coins credited!`, 'success');
+          setVerificationReward(data.reward);
         } else {
           showToast('Resolution confirmed! Complaint closed.', 'success');
         }
@@ -138,25 +140,34 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-300 flex items-center justify-center text-3xl shadow-inner">
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-2xl bg-amber-400/25 border-2 border-amber-300 flex items-center justify-center text-3xl shadow-inner animate-pulse">
               🪙
             </div>
             <div>
-              <div className="text-3xl font-black text-slate-900 leading-none">
-                {user?.coins || 0}
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-black text-slate-900 leading-none">
+                  {user?.coins || 0}
+                </span>
+                <span className="text-xs font-black text-amber-700 uppercase tracking-wide">Coins</span>
               </div>
-              <div className="text-[11px] font-bold text-amber-800 mt-1">
-                Available Civic Credit Coins
+              <div className="text-xs font-extrabold text-emerald-700 mt-1 flex items-center gap-1">
+                <span>≈ ₹{(((user?.coins || 0) / 200) * 5).toFixed(2)} INR Value</span>
               </div>
             </div>
           </div>
 
+          {/* 200 Coins = 5 Rupees Rate Badge */}
+          <div className="px-3 py-1.5 rounded-xl bg-amber-100/80 border border-amber-300 text-center text-[11px] font-black text-amber-950 flex items-center justify-center gap-1.5 shadow-2xs">
+            <span>💰 Exchange Rate:</span>
+            <span className="bg-amber-300 px-2 py-0.5 rounded-md text-slate-950 font-black">200 Coins = ₹5 Rupees</span>
+          </div>
+
           <button
             onClick={() => setShowRedeemModal(true)}
-            className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-102 flex items-center justify-center gap-1.5"
           >
-            <span>🎁 Redeem City Perks & Vouchers</span>
+            <span>🎁 Redeem City Perks (₹{(((user?.coins || 0) / 200) * 5).toFixed(2)})</span>
           </button>
         </div>
       </div>
@@ -347,7 +358,7 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                   Redeem Civic Karma Coins
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Current Balance: <strong className="text-amber-800 font-black">🪙 {user?.coins || 0} Coins</strong>
+                  Current Balance: <strong className="text-amber-800 font-black">🪙 {user?.coins || 0} Coins</strong> (≈ <strong className="text-emerald-700 font-bold">₹{(((user?.coins || 0) / 200) * 5).toFixed(2)} INR</strong>)
                 </p>
               </div>
               <button
@@ -358,6 +369,12 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
               </button>
             </div>
 
+            {/* Exchange rate banner inside store */}
+            <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-center text-xs font-bold text-amber-900 flex items-center justify-center gap-2">
+              <span>💰 Coin Exchange Rate:</span>
+              <span className="bg-amber-300 text-slate-950 px-2 py-0.5 rounded-md font-black">200 Coins = ₹5 Rupees</span>
+            </div>
+
             <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
               {/* Voucher 1 */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 hover:border-amber-400 transition-all">
@@ -365,15 +382,16 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                   <span className="text-2xl">🚇</span>
                   <div>
                     <div className="text-xs font-bold text-slate-900">Pune Metro Daily Pass</div>
-                    <div className="text-[11px] text-slate-500">Free 1-Day unlimited metro rides</div>
+                    <div className="text-[11px] text-slate-500">Free 1-Day unlimited metro rides • Worth ₹3.75 (150 🪙)</div>
                   </div>
                 </div>
                 <button
                   onClick={() => showToast('🎉 Pune Metro Pass voucher code sent to your registered email!', 'success')}
                   disabled={(user?.coins || 0) < 150}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all text-right"
                 >
-                  150 🪙
+                  <div>150 🪙</div>
+                  <div className="text-[9px] opacity-90">(₹3.75)</div>
                 </button>
               </div>
 
@@ -383,15 +401,16 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                   <span className="text-2xl">🏛️</span>
                   <div>
                     <div className="text-xs font-bold text-slate-900">PMC Property Tax Rebate</div>
-                    <div className="text-[11px] text-slate-500">₹250 rebate on annual municipal assessment</div>
+                    <div className="text-[11px] text-slate-500">₹250 rebate on annual assessment • 300 🪙</div>
                   </div>
                 </div>
                 <button
                   onClick={() => showToast('🎉 Tax rebate coupon registered under your Citizen ID!', 'success')}
                   disabled={(user?.coins || 0) < 300}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all text-right"
                 >
-                  300 🪙
+                  <div>300 🪙</div>
+                  <div className="text-[9px] opacity-90">(₹7.50)</div>
                 </button>
               </div>
 
@@ -401,15 +420,16 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                   <span className="text-2xl">🌳</span>
                   <div>
                     <div className="text-xs font-bold text-slate-900">Smart City Green Hero Certificate</div>
-                    <div className="text-[11px] text-slate-500">Municipal Tree Plantation named in your honor</div>
+                    <div className="text-[11px] text-slate-500">Municipal Tree Plantation in your honor • 100 🪙</div>
                   </div>
                 </div>
                 <button
                   onClick={() => showToast('🎉 Green Citizen certificate generated & tree tagged in Shivaji Nagar!', 'success')}
                   disabled={(user?.coins || 0) < 100}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all"
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white font-extrabold text-xs shadow-sm transition-all text-right"
                 >
-                  100 🪙
+                  <div>100 🪙</div>
+                  <div className="text-[9px] opacity-90">(₹2.50)</div>
                 </button>
               </div>
             </div>
@@ -422,6 +442,84 @@ export function CitizenDashboard({ setCurrentTab, onSelectComplaint }) {
                 Close Store
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🎉 Full-Screen Center Verification Celebration Popup (200 Coins = ₹5) */}
+      {verificationReward && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-md p-4 animate-fadeIn overflow-hidden">
+          {/* Floating Coin Shower */}
+          {[...Array(16)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute animate-coin-float pointer-events-none select-none text-2xl sm:text-3xl"
+              style={{
+                left: `${(i * 6.2) + 2}%`,
+                bottom: `${4 + (i % 4) * 12}%`,
+                animationDelay: `${i * 0.1}s`,
+                animationDuration: `${2.2 + (i % 3) * 0.3}s`
+              }}
+            >
+              🪙
+            </div>
+          ))}
+
+          <div className="bg-white border-2 border-emerald-400 rounded-3xl max-w-lg w-full p-6 sm:p-8 text-slate-900 shadow-2xl space-y-5 text-center relative overflow-hidden animate-coin-pop z-10">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-400/25 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative mx-auto w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-400 via-teal-300 to-yellow-200 flex items-center justify-center shadow-2xl shadow-emerald-500/40 border-4 border-white animate-bounce">
+              <span className="text-5xl select-none">🏆</span>
+            </div>
+
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-950 text-xs font-black uppercase tracking-wider border border-emerald-300 shadow-xs">
+                <span>🎉 Citizen Resolution Verified!</span>
+              </div>
+              
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Congratulations! You Got +{verificationReward.coinsEarned} Coins!
+              </h3>
+              
+              <p className="text-xs sm:text-sm text-slate-600 font-medium">
+                You successfully verified and confirmed the municipal field repair.
+              </p>
+            </div>
+
+            {/* 200 COINS = ₹5 RUPEES BANNER */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-amber-400/20 to-teal-500/10 border-2 border-emerald-300 text-center space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-xs font-extrabold text-slate-700">Conversion Value:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white font-black text-xs shadow-xs border border-emerald-600 flex items-center gap-1">
+                  <span>🪙 200 Coins</span>
+                  <span>=</span>
+                  <span className="text-sm font-black">₹5 Rupees</span>
+                </span>
+              </div>
+              <div className="text-xs font-bold text-slate-700 pt-1 flex items-center justify-center gap-4">
+                <span>Reward: <strong className="text-emerald-700 font-black text-sm">₹{((verificationReward.coinsEarned / 200) * 5).toFixed(2)}</strong></span>
+                <span className="text-slate-300">•</span>
+                <span>Total Balance: <strong className="text-amber-900 font-black text-sm">₹{((verificationReward.totalCoins / 200) * 5).toFixed(2)}</strong></span>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2">
+              <div className="flex justify-between items-center text-xs font-black text-slate-900">
+                <span>New Wallet Balance:</span>
+                <span className="text-amber-800 text-sm font-black">
+                  🪙 {verificationReward.totalCoins} Coins (₹{((verificationReward.totalCoins / 200) * 5).toFixed(2)})
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setVerificationReward(null)}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-600/25 transition-all hover:scale-102 flex items-center justify-center gap-2"
+            >
+              <span>Great! Continue to Dashboard (₹{((verificationReward.totalCoins / 200) * 5).toFixed(2)}) ➔</span>
+            </button>
           </div>
         </div>
       )}
