@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import {
   Camera,
   Upload,
@@ -18,7 +19,9 @@ import {
   FlipHorizontal,
   Trash2,
   Video,
-  Check
+  Check,
+  Navigation,
+  Compass
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -159,6 +162,11 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     { lang: 'Marathi (मराठी)', text: 'इथे रस्त्यावर मोठा खड्डा पडला आहे आणि पाण्याचा निचरा होत नाही.' }
   ];
 
+  // Leaflet Mini-Map refs
+  const miniMapContainerRef = useRef(null);
+  const miniMapInstanceRef = useRef(null);
+  const miniMarkerRef = useRef(null);
+
   // Dynamic Preset Selection Handler
   const handleSelectPreset = (sample) => {
     setImageUrl(sample.url);
@@ -167,7 +175,12 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
       setCategory(sample.cat);
       setWardId(sample.wardId);
       setRoadName(sample.road);
-      setGpsCoords(WARD_INFO[sample.wardId]?.coords || { lat: 21.1425, lng: 79.0620 });
+      const coords = WARD_INFO[sample.wardId]?.coords || { lat: 21.1425, lng: 79.0620 };
+      setGpsCoords(coords);
+      if (miniMapInstanceRef.current && miniMarkerRef.current) {
+        miniMapInstanceRef.current.flyTo([coords.lat, coords.lng], 14, { duration: 0.8 });
+        miniMarkerRef.current.setLatLng([coords.lat, coords.lng]);
+      }
       if (!description || SAMPLE_IMAGES.some(s => s.prompt === description)) {
         setDescription(sample.prompt);
       }
@@ -183,6 +196,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     if (info) {
       setRoadName(info.defaultRoad);
       setGpsCoords(info.coords);
+      if (miniMapInstanceRef.current && miniMarkerRef.current) {
+        miniMapInstanceRef.current.flyTo([info.coords.lat, info.coords.lng], 14, { duration: 0.8 });
+        miniMarkerRef.current.setLatLng([info.coords.lat, info.coords.lng]);
+      }
     }
   };
 
@@ -330,7 +347,14 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
 
         setRoadName(finalRoadName);
         setGpsDetecting(false);
-        showToast(`📍 Live GPS: ${finalRoadName} (${WARD_INFO[matchedWard]?.name.split('-')[0]})`, 'success');
+
+        // 4. Fly map to detected point
+        if (miniMapInstanceRef.current && miniMarkerRef.current) {
+          miniMapInstanceRef.current.flyTo([latitude, longitude], 15, { duration: 1.0 });
+          miniMarkerRef.current.setLatLng([latitude, longitude]);
+        }
+
+        showToast(`📍 Ward Switched to ${WARD_INFO[matchedWard]?.name.split('-')[0]} (${finalRoadName})`, 'success');
       },
       (err) => {
         setGpsDetecting(false);
@@ -345,6 +369,91 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     );
   };
 
+  // Initialize interactive Leaflet mini-map for live pin drag/click in Section 3
+  useEffect(() => {
+    if (!miniMapContainerRef.current) return;
+    if (miniMapInstanceRef.current) return;
+
+    try {
+      const map = L.map(miniMapContainerRef.current, {
+        center: [gpsCoords.lat, gpsCoords.lng],
+        zoom: 13,
+        zoomControl: true,
+        attributionControl: false
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      const customPin = L.divIcon({
+        html: `
+          <div class="relative flex items-center justify-center">
+            <div class="w-8 h-8 rounded-full bg-blue-500/30 animate-ping absolute"></div>
+            <div class="w-7 h-7 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg border-2 border-white text-xs font-black">
+              📍
+            </div>
+          </div>
+        `,
+        className: 'interactive-mini-pin',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+      });
+
+      const marker = L.marker([gpsCoords.lat, gpsCoords.lng], {
+        draggable: true,
+        icon: customPin
+      }).addTo(map);
+
+      // Click anywhere to move pin, reverse-geocode & auto-switch Municipal Ward & Road
+      map.on('click', async (e) => {
+        const { lat, lng } = e.latlng;
+        marker.setLatLng([lat, lng]);
+        setGpsCoords({ lat, lng });
+        setGpsLocked(true);
+
+        const rawAddress = await getAddressFromCoords(lat, lng);
+        const matchedWard = resolveWardFromAddressOrCoords(rawAddress, lat, lng);
+        setWardId(matchedWard);
+
+        const finalRoadName = rawAddress && !rawAddress.includes('undefined')
+          ? rawAddress
+          : WARD_INFO[matchedWard]?.defaultRoad || 'Nagpur Road';
+        setRoadName(finalRoadName);
+        showToast(`📍 Municipal Ward Switched to ${WARD_INFO[matchedWard]?.name.split('-')[0]}!`, 'success');
+      });
+
+      // Marker Drag
+      marker.on('dragend', async () => {
+        const { lat, lng } = marker.getLatLng();
+        setGpsCoords({ lat, lng });
+        setGpsLocked(true);
+
+        const rawAddress = await getAddressFromCoords(lat, lng);
+        const matchedWard = resolveWardFromAddressOrCoords(rawAddress, lat, lng);
+        setWardId(matchedWard);
+
+        const finalRoadName = rawAddress && !rawAddress.includes('undefined')
+          ? rawAddress
+          : WARD_INFO[matchedWard]?.defaultRoad || 'Nagpur Road';
+        setRoadName(finalRoadName);
+        showToast(`📍 Municipal Ward Switched to ${WARD_INFO[matchedWard]?.name.split('-')[0]}!`, 'success');
+      });
+
+      miniMapInstanceRef.current = map;
+      miniMarkerRef.current = marker;
+    } catch (mapErr) {
+      console.warn('Mini map init error:', mapErr);
+    }
+
+    return () => {
+      if (miniMapInstanceRef.current) {
+        miniMapInstanceRef.current.remove();
+        miniMapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
   // Custom Road input change with auto Ward detection
   const handleRoadNameChange = (newRoad) => {
     setRoadName(newRoad);
@@ -352,6 +461,10 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
     if (autoWard && autoWard !== wardId) {
       setWardId(autoWard);
       setGpsCoords(WARD_INFO[autoWard]?.coords || { lat: 21.1425, lng: 79.0620 });
+      if (miniMapInstanceRef.current && miniMarkerRef.current) {
+        miniMapInstanceRef.current.flyTo([WARD_INFO[autoWard].coords.lat, WARD_INFO[autoWard].coords.lng], 14, { duration: 0.8 });
+        miniMarkerRef.current.setLatLng([WARD_INFO[autoWard].coords.lat, WARD_INFO[autoWard].coords.lng]);
+      }
     }
   };
 
@@ -951,7 +1064,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
           )}
         </div>
 
-        {/* Step 3: Location & Ward (Fully Dynamic) */}
+        {/* Step 3: Location & Ward (Fully Dynamic with Interactive Map & GPS Auto-Ward Sync) */}
         <div className="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200 space-y-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -964,15 +1077,47 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
               type="button"
               onClick={detectGpsLocation}
               disabled={gpsDetecting}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20"
             >
               {gpsDetecting ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-white" />
               ) : (
-                <MapPin className="w-3.5 h-3.5 text-blue-600" />
+                <Navigation className="w-3.5 h-3.5 text-white animate-pulse" />
               )}
-              <span>{gpsDetecting ? 'Locating GPS...' : '📍 Auto-Detect Live GPS'}</span>
+              <span>{gpsDetecting ? 'Detecting GPS...' : '📍 Auto-Detect Live GPS'}</span>
             </button>
+          </div>
+
+          {/* Quick Ward Selector Bar */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-slate-100 border border-slate-200 text-xs">
+            <span className="px-2 font-bold text-slate-500 text-[11px]">Select Ward:</span>
+            {Object.entries(WARD_INFO).map(([wKey, info]) => {
+              const isSelected = wardId === wKey;
+              return (
+                <button
+                  key={wKey}
+                  type="button"
+                  onClick={() => handleWardChange(wKey)}
+                  className={`px-3 py-1.5 rounded-xl font-extrabold text-xs transition-all flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 scale-105'
+                      : 'bg-white hover:bg-slate-200 text-slate-700 border border-slate-200'
+                  }`}
+                >
+                  <span>🏢 {info.name.split('-')[0].trim()}</span>
+                  <span className={`text-[10px] opacity-80 ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>({info.defaultRoad.split(',')[0]})</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Interactive Leaflet Mini-Map (Click / Drag to set location) */}
+          <div className="relative w-full h-48 sm:h-56 rounded-2xl overflow-hidden border border-slate-200 shadow-sm z-0">
+            <div ref={miniMapContainerRef} className="w-full h-full" />
+            <div className="absolute top-2 left-2 z-[400] bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-200 text-[11px] font-bold text-slate-700 shadow-sm flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-blue-600" />
+              <span>Click on map or drag pin to auto-switch Ward & Road</span>
+            </div>
           </div>
 
           {/* Dynamic Location Inputs */}
@@ -980,7 +1125,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs text-slate-600 font-semibold block">Road / Landmark Name</label>
-                <span className="text-[10px] text-blue-600 font-bold">Dynamic Auto-Fill</span>
+                <span className="text-[10px] text-blue-600 font-bold">Auto-Syncs with GPS & Map</span>
               </div>
               <input
                 type="text"
@@ -994,12 +1139,12 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs text-slate-600 font-semibold block">Municipal Ward</label>
-                <span className="text-[10px] text-indigo-600 font-bold">NMC Ward Division</span>
+                <span className="text-[10px] text-indigo-600 font-bold">Auto-Detected Ward</span>
               </div>
               <select
                 value={wardId}
                 onChange={(e) => handleWardChange(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 font-semibold"
+                className="w-full bg-blue-50/50 border border-blue-200 rounded-xl px-3 py-2.5 text-xs text-blue-900 font-extrabold focus:outline-none focus:bg-white focus:border-blue-500 shadow-xs"
               >
                 <option value="ward_12">Ward 12 - Dharampeth & WHC Road Area</option>
                 <option value="ward_8">Ward 8 - Sitabuldi & Central Commercial Hub</option>
@@ -1045,7 +1190,7 @@ export function ReportIssuePage({ setCurrentTab, onComplaintSubmitted }) {
             </div>
             <div className="flex items-center gap-1.5 text-indigo-700 font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Real-time Geocoded (Nagpur)</span>
+              <span>Active Ward: {WARD_INFO[wardId]?.name.split('-')[0]}</span>
             </div>
           </div>
 
