@@ -1,7 +1,15 @@
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  initSupabase,
+  saveUserToSupabase,
+  saveComplaintToSupabase,
+  updateComplaintInSupabase,
+  saveTimelineUpdateToSupabase,
+  saveNotificationToSupabase
+} from './supabaseDb.js';
 
-// In-Memory Database Store simulating MongoDB Collections with full relation helpers and persistence
+// Database Store with live Supabase PostgreSQL persistence and caching
 class Database {
   constructor() {
     this.users = [];
@@ -754,6 +762,9 @@ class Database {
         createdAt: '2026-09-28T14:30:00.000Z'
       }
     ];
+
+    // Initialize Supabase PostgreSQL database tables and seeds
+    initSupabase(this.users, this.complaints).catch(err => console.warn('Supabase init notice:', err.message));
   }
 
   // --- Helper Methods ---
@@ -769,6 +780,7 @@ class Database {
   addUser(user) {
     const newUser = { id: user.id || `usr_${uuidv4()}`, createdAt: new Date().toISOString(), ...user };
     this.users.push(newUser);
+    saveUserToSupabase(newUser).catch(err => console.warn('Supabase save user notice:', err.message));
     return newUser;
   }
 
@@ -795,6 +807,7 @@ class Database {
       ...complaint
     };
     this.complaints.unshift(newComplaint);
+    saveComplaintToSupabase(newComplaint).catch(err => console.warn('Supabase save complaint notice:', err.message));
     return newComplaint;
   }
 
@@ -806,6 +819,7 @@ class Database {
       ...updates,
       updatedAt: new Date().toISOString()
     };
+    updateComplaintInSupabase(id, updates).catch(err => console.warn('Supabase update complaint notice:', err.message));
     return this.complaints[index];
   }
 
@@ -860,6 +874,7 @@ class Database {
       ...update
     };
     this.complaintUpdates.push(newUpdate);
+    saveTimelineUpdateToSupabase(newUpdate).catch(err => console.warn('Supabase save update notice:', err.message));
     return newUpdate;
   }
 
@@ -875,6 +890,7 @@ class Database {
       ...notif
     };
     this.notifications.unshift(newNotif);
+    saveNotificationToSupabase(newNotif).catch(err => console.warn('Supabase save notification notice:', err.message));
     return newNotif;
   }
 
